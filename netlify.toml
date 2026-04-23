@@ -1,0 +1,14 @@
+[build]
+  publish = "."
+  command = """
+    echo \"const CALORIQ_CONFIG = { \
+      GEMINI_API_KEY: '$GEMINI_API_KEY', \
+      GEMINI_MODEL: 'gemini-2.0-flash-lite', \
+      DEFAULT_DAILY_GOAL: 2000 \
+    };\" > config.js
+  """
+
+[[headers]]
+  for = "/config.js"
+  [headers.values]
+    Cache-Control = "no-store"

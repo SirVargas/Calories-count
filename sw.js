@@ -21,8 +21,8 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // Always go to network for Gemini API calls
   if (e.request.url.includes('generativelanguage.googleapis.com')) return;
+  if (e.request.url.includes('config.js')) return;
 
   e.respondWith(
     caches.match(e.request).then(cached => {

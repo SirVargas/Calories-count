@@ -1,4 +1,4 @@
-# ⚠️ SECURITY: config.js contains your API key — NEVER commit it
+# API key — generated at deploy time by Netlify, never committed
 config.js
 
 # OS junk
