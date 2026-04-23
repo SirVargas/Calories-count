@@ -1,6 +1,6 @@
-# ⚠️ SECURITY: config.js contains your API key — NEVER commit it
+# ⚠️ SECURITY: config.js was removed — API keys are stored in
+# the browser's localStorage, never in the repo.
 config.js
-!config.example.js
 
 # OS junk
 .DS_Store
