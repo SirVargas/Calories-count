@@ -34,7 +34,7 @@ const TRANSLATIONS = {
     saveGoal: 'Save goal',
     goalUpdated: '✓ Daily goal updated to',
     goalError: 'Please enter a goal between 500 and 9999 kcal',
-    mealSaved: '✓ Meal saved to today\\\'s log',
+    mealSaved: '✓ Meal saved to today\'s log',
     removeThisMeal: 'Remove this meal?',
     deleteEntry: 'This entry will be deleted from your log.',
     cancel: 'Cancel',
@@ -46,7 +46,7 @@ const TRANSLATIONS = {
     setupTitle: 'Caloriq',
     setupSub: 'Enter your Gemini API key to get started.',
     apiKeyLabel: 'Gemini API Key',
-    apiKeyHint: 'Get your free key at <a href=\"https://aistudio.google.com/app/apikey\" target=\"_blank\">aistudio.google.com</a>',
+    apiKeyHint: 'Get your free key at <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a>',
     saveKey: 'Save & continue',
     apiKeyError: 'Enter a valid Gemini API key (starts with AIza…)',
     failedLoadImage: 'Failed to load image',
@@ -105,7 +105,7 @@ const TRANSLATIONS = {
     setupTitle: 'Caloriq',
     setupSub: 'Ingresa tu clave de API de Gemini para comenzar.',
     apiKeyLabel: 'Clave API de Gemini',
-    apiKeyHint: 'Obtén tu clave gratuita en <a href=\"https://aistudio.google.com/app/apikey\" target=\"_blank\">aistudio.google.com</a>',
+    apiKeyHint: 'Obtén tu clave gratuita en <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a>',
     saveKey: 'Guardar y continuar',
     apiKeyError: 'Ingresa una clave de API de Gemini válida (comienza con AIza…)',
     failedLoadImage: 'Error al cargar imagen',
@@ -283,35 +283,35 @@ function renderHome() {
   const list = document.getElementById('meal-list');
   const meals = todayMeals().slice().reverse();
   if (!meals.length) {
-    list.innerHTML = `<div class=\"empty-state\">
-      <div class=\"empty-icon\">🍽️</div>
-      <p class=\"empty-text\">${t('noMealsToday')}<br/>${t('tapToStart')}</p>
+    list.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">🍽️</div>
+      <p class="empty-text">${t('noMealsToday')}<br/>${t('tapToStart')}</p>
     </div>`;
     return;
   }
 
   list.innerHTML = meals.map(m => `
-    <div class=\"meal-card\">
-      <div class=\"meal-card-inner\">
+    <div class="meal-card">
+      <div class="meal-card-inner">
         ${m.photo
-          ? `<img class=\"meal-thumb\" src=\"${m.photo}\" alt=\"${escHtml(m.name)}\"/>`
-          : `<div class=\"meal-thumb\" style=\"background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:28px\">🍽️</div>`}
-        <div class=\"meal-info\">
+          ? `<img class="meal-thumb" src="${m.photo}" alt="${escHtml(m.name)}"/>`
+          : `<div class="meal-thumb" style="background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:28px">🍽️</div>`}
+        <div class="meal-info">
           <div>
-            <div class=\"meal-name\">${escHtml(m.name)}</div>
-            <div class=\"meal-time\">${m.time}</div>
+            <div class="meal-name">${escHtml(m.name)}</div>
+            <div class="meal-time">${m.time}</div>
           </div>
-          <div class=\"meal-cals-row\">
-            <span><span class=\"meal-cals\">${Math.round(m.cals)}</span><span class=\"meal-kcal-label\"> kcal</span></span>
-            <span class=\"meal-macros\">P ${Math.round(m.protein)}g · C ${Math.round(m.carbs)}g · F ${Math.round(m.fat)}g</span>
+          <div class="meal-cals-row">
+            <span><span class="meal-cals">${Math.round(m.cals)}</span><span class="meal-kcal-label"> kcal</span></span>
+            <span class="meal-macros">P ${Math.round(m.protein)}g · C ${Math.round(m.carbs)}g · F ${Math.round(m.fat)}g</span>
           </div>
         </div>
-        <div class=\"meal-actions\">
-          <button class=\"meal-action-btn\" title=\"${t('editMeal')}\" onclick=\"openEditMeal('${m.id}')\">
-            <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"><path d=\"M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7\"/><path d=\"M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z\"/></svg>
+        <div class="meal-actions">
+          <button class="meal-action-btn" title="${t('editMeal')}" onclick="openEditMeal('${m.id}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           </button>
-          <button class=\"meal-action-btn\" title=\"${t('delete')}\" onclick=\"askDelete('${m.id}')\">
-            <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"><polyline points=\"3 6 5 6 21 6\"/><path d=\"M19 6l-1 14H6L5 6\"/><path d=\"M10 11v6M14 11v6\"/><path d=\"M9 6V4h6v2\"/></svg>
+          <button class="meal-action-btn" title="${t('delete')}" onclick="askDelete('${m.id}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
           </button>
         </div>
       </div>
@@ -326,6 +326,7 @@ function getChartColors() {
     const style = getComputedStyle(document.body);
     return {
         accent: style.getPropertyValue('--accent'),
+        text: style.getPropertyValue('--text'),
         text2: style.getPropertyValue('--text2'),
         surface1: style.getPropertyValue('--surface1'),
         surface2: style.getPropertyValue('--surface2'),
@@ -334,33 +335,39 @@ function getChartColors() {
 
 function renderStats() {
     const colors = getChartColors();
+    const locale = state.lang === 'es' ? 'es-MX' : 'en-US';
 
-    // Daily Calories Chart
-    const dailyData = { labels: [], calories: [] };
-    for (let i = 6; i >= 0; i--) {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        const dayKey = d.toISOString().slice(0, 10);
-        const meals = state.meals.filter(m => m.date === dayKey);
-        const totalCals = meals.reduce((sum, m) => sum + m.cals, 0);
-        dailyData.labels.push(d.toLocaleDateString(state.lang === 'es' ? 'es-MX' : 'en-US', { weekday: 'short' }));
-        dailyData.calories.push(totalCals);
+    // Chart data based on view
+    let chartData, macroData;
+    if (state.statsView === 'day') {
+        chartData = getPeriodData(7, 'day');
+        macroData = getPeriodData(1, 'day'); // Today for macro
+    } else if (state.statsView === 'week') {
+        chartData = getPeriodData(4, 'week');
+        macroData = getPeriodData(7, 'day'); // Last 7 days for macro
+    } else { // month
+        chartData = getPeriodData(6, 'month');
+        macroData = getPeriodData(30, 'day'); // Last 30 days for macro
     }
 
+    // Daily Calories Chart
     if (state.charts.daily) state.charts.daily.destroy();
     state.charts.daily = new Chart(document.getElementById('daily-calories-chart'), {
         type: 'bar',
         data: {
-            labels: dailyData.labels,
+            labels: chartData.labels,
             datasets: [{
                 label: t('calories'),
-                data: dailyData.calories,
+                data: chartData.calories,
                 backgroundColor: colors.accent,
                 borderRadius: 4,
             }]
         },
         options: {
-            plugins: { legend: { display: false } },
+            plugins: { 
+                legend: { display: false },
+                tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${Math.round(c.raw)} kcal` } }
+            },
             scales: {
                 y: { grid: { color: colors.surface2 }, ticks: { color: colors.text2 } },
                 x: { grid: { display: false }, ticks: { color: colors.text2 } }
@@ -369,64 +376,83 @@ function renderStats() {
     });
 
     // Macro Distribution Chart
-    const totals = todayTotals();
+    const macroTotals = macroData.calories.map((_, i) => ({ 
+        protein: macroData.protein[i], 
+        carbs: macroData.carbs[i], 
+        fat: macroData.fat[i] 
+    })).reduce((acc, d) => ({ 
+        protein: acc.protein + d.protein, 
+        carbs: acc.carbs + d.carbs, 
+        fat: acc.fat + d.fat 
+    }), { protein: 0, carbs: 0, fat: 0 });
+
     if (state.charts.macro) state.charts.macro.destroy();
     state.charts.macro = new Chart(document.getElementById('macro-distribution-chart'), {
         type: 'doughnut',
         data: {
             labels: [t('protein'), t('carbs'), t('fat')],
             datasets: [{
-                data: [totals.protein, totals.carbs, totals.fat],
+                data: [macroTotals.protein, macroTotals.carbs, macroTotals.fat],
                 backgroundColor: ['#10B981', '#3B82F6', '#F59E0B']
             }]
         },
         options: {
-            plugins: { legend: { position: 'bottom', labels: { color: colors.text2 } } },
+            plugins: { 
+                legend: { position: 'bottom', labels: { color: colors.text2 } },
+                tooltip: { callbacks: { label: (c) => `${c.label}: ${Math.round(c.raw)} g` } }
+            },
             cutout: '70%'
         }
     });
+}
 
-    // Monthly Trend Chart
-    const weeklyData = { labels: [], calories: [] };
-    for (let i = 29; i >= 0; i--) {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        const dayKey = d.toISOString().slice(0, 10);
-        const meals = state.meals.filter(m => m.date === dayKey);
-        const totalCals = meals.reduce((sum, m) => sum + m.cals, 0);
-        weeklyData.labels.push(d.toLocaleDateString(state.lang === 'es' ? 'es-MX' : 'en-US', { month: 'short', day: 'numeric' }));
-        weeklyData.calories.push(totalCals);
-    }
+function getPeriodData(count, unit) {
+    const labels = [];
+    const calories = [], protein = [], carbs = [], fat = [];
+    const locale = state.lang === 'es' ? 'es-MX' : 'en-US';
 
-    if (state.charts.monthly) state.charts.monthly.destroy();
-    state.charts.monthly = new Chart(document.getElementById('monthly-trend-chart'), {
-        type: 'line',
-        data: {
-            labels: weeklyData.labels,
-            datasets: [{
-                label: t('calories'),
-                data: weeklyData.calories,
-                borderColor: colors.accent,
-                tension: 0.1
-            }]
-        },
-        options: {
-            plugins: { legend: { display: false } },
-            scales: {
-                y: { grid: { color: colors.surface2 }, ticks: { color: colors.text2 } },
-                x: { grid: { display: false }, ticks: { color: colors.text2 } }
-            }
+    for (let i = count - 1; i >= 0; i--) {
+        const start = new Date();
+        const end = new Date();
+
+        if (unit === 'day') {
+            start.setDate(start.getDate() - i);
+            end.setDate(end.getDate() - i);
+            labels.push(start.toLocaleDateString(locale, { weekday: 'short' }));
+        } else if (unit === 'week') {
+            start.setDate(start.getDate() - (i + 1) * 7 + 1);
+            end.setDate(end.getDate() - i * 7);
+            labels.push(`${start.toLocaleDateString(locale, {month:'short', day:'numeric'})}`);
+        } else { // month
+            start.setMonth(start.getMonth() - i, 1);
+            end.setMonth(end.getMonth() - i + 1, 0);
+            labels.push(start.toLocaleDateString(locale, { month: 'short' }));
         }
-    });
+
+        const periodMeals = state.meals.filter(m => {
+            const mealDate = new Date(m.date + 'T00:00:00');
+            return mealDate >= start.setHours(0,0,0,0) && mealDate <= end.setHours(23,59,59,999);
+        });
+
+        const totals = periodMeals.reduce((acc, m) => ({
+            cal: acc.cal + m.cals, protein: acc.protein + m.protein,
+            carbs: acc.carbs + m.carbs, fat: acc.fat + m.fat
+        }), { cal: 0, protein: 0, carbs: 0, fat: 0 });
+        
+        calories.push(totals.cal);
+        protein.push(totals.protein);
+        carbs.push(totals.carbs);
+        fat.push(totals.fat);
+    }
+    return { labels, calories, protein, carbs, fat };
 }
 
 function setStatsView(view) {
   state.statsView = view;
   document.querySelectorAll('.stats-view-selector .view-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.textContent.toLowerCase() === view);
+    btn.classList.toggle('active', btn.dataset.view === view);
   });
-  // In a real app, you would re-render the charts based on the selected view.
-  // For now, this is just a UI change.
+  renderStats();
 }
 
 /* ─────────────────────────────────────────────────────────
@@ -625,7 +651,7 @@ async function analyzePhoto() {
   console.log('[Caloriq] analyzePhoto() start — mimeType:', mimeType, '| base64 length:', base64.length);
 
   try {
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${state.apiKey}`;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=${state.apiKey}`;
     console.log('[Caloriq] Sending request to Gemini API…');
 
     const res = await fetch(apiUrl, {
@@ -638,7 +664,7 @@ async function analyzePhoto() {
             { inlineData: { mimeType, data: base64 } }
           ]
         }],
-        generationConfig: { temperature: 0.2, maxOutputTokens: 800 }
+        generationConfig: { temperature: 0.2, maxOutputTokens: 2048 }
       })
     });
 
@@ -860,7 +886,7 @@ function showToast(msg, success = false) {
   t_el.style.borderColor = success ? 'var(--toast-ok-border)' : 'var(--toast-err-border)';
   t_el.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t_el.classList.remove('show'), 10000);
+  toastimer = setTimeout(() => t_el.classList.remove('show'), 10000);
 }
 
 /* ─────────────────────────────────────────────────────────
@@ -871,7 +897,7 @@ function escHtml(s) {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-    .replace(/\"/g, '&quot;');
+    .replace(/"/g, '&quot;');
 }
 
 /* ─────────────────────────────────────────────────────────
@@ -887,7 +913,7 @@ function applyTheme(theme) {
       const icon = document.getElementById(id);
       if (icon) icon.style.display = theme === 'light' ? '' : 'none';
   });
-  document.querySelector('meta[name=\"theme-color\"]').content = theme === 'dark' ? '#0f1a14' : '#f5f7f3';
+  document.querySelector('meta[name="theme-color"]').content = theme === 'dark' ? '#0f1a14' : '#f5f7f3';
 }
 
 function toggleTheme() {

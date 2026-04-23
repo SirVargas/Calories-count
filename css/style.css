@@ -263,6 +263,17 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 .stats-content { padding: 0 22px 40px; }
 .stats-view-selector { display: flex; gap: 8px; margin-bottom: 24px; }
 .view-btn { flex: 1; height: 38px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); color: var(--text2); font-family: var(--ff); font-size: 13px; font-weight: 500; cursor: pointer; transition: background .15s, color .15s, border-color .15s; }
-.view-btn.active { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); }
+.view-btn.active {
+    background: var(--accent-dim);
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+[data-theme="dark"] .view-btn.active {
+    background: var(--accent);
+    color: var(--btn-text);
+    border-color: var(--accent);
+}
+
 .chart-container { margin-bottom: 24px; background: var(--surface); border-radius: var(--radius); padding: 16px; border: 1px solid var(--border); }
 .chart-container h3 { font-family: var(--ff-display); font-size: 18px; color: var(--text); margin-bottom: 12px; }
