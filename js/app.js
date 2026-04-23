@@ -223,6 +223,13 @@ function goCapture() {
   document.getElementById('analyze-btn').disabled = !state.currentPhoto;
 }
 
+function goStats() {
+  setStatsView('day'); // Default to day view
+  renderStats();
+  showScreen('stats');
+}
+
+
 /* ─────────────────────────────────────────────────────────
    API KEY SETUP
 ───────────────────────────────────────────────────────── */
@@ -328,77 +335,106 @@ function getChartColors() {
         accent: style.getPropertyValue('--accent'),
         text: style.getPropertyValue('--text'),
         text2: style.getPropertyValue('--text2'),
-        surface1: style.getPropertyValue('--surface1'),
+        surface: style.getPropertyValue('--surface'),
         surface2: style.getPropertyValue('--surface2'),
+        border: style.getPropertyValue('--border')
     };
 }
 
 function renderStats() {
     const colors = getChartColors();
-    const locale = state.lang === 'es' ? 'es-MX' : 'en-US';
 
-    // Chart data based on view
-    let chartData, macroData;
-    if (state.statsView === 'day') {
-        chartData = getPeriodData(7, 'day');
-        macroData = getPeriodData(1, 'day'); // Today for macro
-    } else if (state.statsView === 'week') {
-        chartData = getPeriodData(4, 'week');
-        macroData = getPeriodData(7, 'day'); // Last 7 days for macro
-    } else { // month
-        chartData = getPeriodData(6, 'month');
-        macroData = getPeriodData(30, 'day'); // Last 30 days for macro
+    // Destroy existing charts to prevent memory leaks
+    if (state.charts.daily) state.charts.daily.destroy();
+    if (state.charts.monthly) state.charts.monthly.destroy();
+    if (state.charts.macro) state.charts.macro.destroy();
+
+    const isMonthView = state.statsView === 'month';
+    
+    // Show/hide the correct chart containers
+    document.getElementById('daily-calories-chart-container').style.display = isMonthView ? 'none' : 'block';
+    document.getElementById('monthly-trend-chart-container').style.display = isMonthView ? 'block' : 'none';
+
+    if (isMonthView) {
+        // MONTH VIEW: Show monthly trend line chart
+        const monthlyData = getPeriodData(12, 'month');
+        state.charts.monthly = new Chart(document.getElementById('monthly-trend-chart'), {
+            type: 'line',
+            data: {
+                labels: monthlyData.labels,
+                datasets: [{
+                    label: t('calories'),
+                    data: monthlyData.calories,
+                    borderColor: colors.accent,
+                    tension: 0.2,
+                    pointBackgroundColor: colors.accent,
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${Math.round(c.raw)} kcal` } }
+                },
+                scales: {
+                    y: { grid: { color: colors.border }, ticks: { color: colors.text2 } },
+                    x: { grid: { color: colors.border }, ticks: { color: colors.text2 } }
+                }
+            }
+        });
+    } else {
+        // DAY/WEEK VIEW: Show daily/weekly bar chart
+        const isDayView = state.statsView === 'day';
+        const periodData = getPeriodData(isDayView ? 7 : 4, isDayView ? 'day' : 'week');
+        state.charts.daily = new Chart(document.getElementById('daily-calories-chart'), {
+            type: 'bar',
+            data: {
+                labels: periodData.labels,
+                datasets: [{
+                    label: t('calories'),
+                    data: periodData.calories,
+                    backgroundColor: colors.accent,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${Math.round(c.raw)} kcal` } }
+                },
+                scales: {
+                    y: { grid: { color: colors.border }, ticks: { color: colors.text2 } },
+                    x: { grid: { display: false }, ticks: { color: colors.text2 } }
+                }
+            }
+        });
     }
 
-    // Daily Calories Chart
-    if (state.charts.daily) state.charts.daily.destroy();
-    state.charts.daily = new Chart(document.getElementById('daily-calories-chart'), {
-        type: 'bar',
-        data: {
-            labels: chartData.labels,
-            datasets: [{
-                label: t('calories'),
-                data: chartData.calories,
-                backgroundColor: colors.accent,
-                borderRadius: 4,
-            }]
-        },
-        options: {
-            plugins: { 
-                legend: { display: false },
-                tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${Math.round(c.raw)} kcal` } }
-            },
-            scales: {
-                y: { grid: { color: colors.surface2 }, ticks: { color: colors.text2 } },
-                x: { grid: { display: false }, ticks: { color: colors.text2 } }
-            }
-        }
-    });
+    // MACRO CHART (visible in all views)
+    let macroPeriodDays;
+    if (state.statsView === 'day') macroPeriodDays = 1;
+    else if (state.statsView === 'week') macroPeriodDays = 7;
+    else macroPeriodDays = 30;
+    
+    const macroData = getPeriodData(macroPeriodDays, 'day', true);
+    const macroTotals = {
+        protein: macroData.protein.reduce((a, b) => a + b, 0),
+        carbs: macroData.carbs.reduce((a, b) => a + b, 0),
+        fat: macroData.fat.reduce((a, b) => a + b, 0),
+    };
 
-    // Macro Distribution Chart
-    const macroTotals = macroData.calories.map((_, i) => ({ 
-        protein: macroData.protein[i], 
-        carbs: macroData.carbs[i], 
-        fat: macroData.fat[i] 
-    })).reduce((acc, d) => ({ 
-        protein: acc.protein + d.protein, 
-        carbs: acc.carbs + d.carbs, 
-        fat: acc.fat + d.fat 
-    }), { protein: 0, carbs: 0, fat: 0 });
-
-    if (state.charts.macro) state.charts.macro.destroy();
     state.charts.macro = new Chart(document.getElementById('macro-distribution-chart'), {
         type: 'doughnut',
         data: {
             labels: [t('protein'), t('carbs'), t('fat')],
             datasets: [{
                 data: [macroTotals.protein, macroTotals.carbs, macroTotals.fat],
-                backgroundColor: ['#10B981', '#3B82F6', '#F59E0B']
+                backgroundColor: ['#10B981', '#3B82F6', '#F59E0B'],
+                borderWidth: 0,
             }]
         },
         options: {
             plugins: { 
-                legend: { position: 'bottom', labels: { color: colors.text2 } },
+                legend: { position: 'bottom', labels: { color: colors.text2, boxWidth: 12, padding: 20 } },
                 tooltip: { callbacks: { label: (c) => `${c.label}: ${Math.round(c.raw)} g` } }
             },
             cutout: '70%'
@@ -406,7 +442,7 @@ function renderStats() {
     });
 }
 
-function getPeriodData(count, unit) {
+function getPeriodData(count, unit, isMacro = false) {
     const labels = [];
     const calories = [], protein = [], carbs = [], fat = [];
     const locale = state.lang === 'es' ? 'es-MX' : 'en-US';
@@ -414,24 +450,31 @@ function getPeriodData(count, unit) {
     for (let i = count - 1; i >= 0; i--) {
         const start = new Date();
         const end = new Date();
+        let label = '';
 
         if (unit === 'day') {
             start.setDate(start.getDate() - i);
             end.setDate(end.getDate() - i);
-            labels.push(start.toLocaleDateString(locale, { weekday: 'short' }));
+            if (!isMacro) label = start.toLocaleDateString(locale, { weekday: 'short' });
         } else if (unit === 'week') {
-            start.setDate(start.getDate() - (i + 1) * 7 + 1);
-            end.setDate(end.getDate() - i * 7);
-            labels.push(`${start.toLocaleDateString(locale, {month:'short', day:'numeric'})}`);
+            start.setDate(start.getDate() - (i * 7) - 6);
+            end.setDate(end.getDate() - (i * 7));
+            const startStr = start.toLocaleDateString(locale, { day: 'numeric' });
+            const endStr = end.toLocaleDateString(locale, { month:'short', day:'numeric' });
+            label = `${startStr} - ${endStr}`;
         } else { // month
             start.setMonth(start.getMonth() - i, 1);
             end.setMonth(end.getMonth() - i + 1, 0);
-            labels.push(start.toLocaleDateString(locale, { month: 'short' }));
+            label = start.toLocaleDateString(locale, { month: 'short' });
         }
+        if (!isMacro) labels.push(label);
+
+        const s1 = new Date(start.setHours(0,0,0,0));
+        const e1 = new Date(end.setHours(23,59,59,999));
 
         const periodMeals = state.meals.filter(m => {
-            const mealDate = new Date(m.date + 'T00:00:00');
-            return mealDate >= start.setHours(0,0,0,0) && mealDate <= end.setHours(23,59,59,999);
+            const mealDate = new Date(m.date + 'T12:00:00'); // Use noon to avoid timezone issues
+            return mealDate >= s1 && mealDate <= e1;
         });
 
         const totals = periodMeals.reduce((acc, m) => ({
@@ -651,7 +694,7 @@ async function analyzePhoto() {
   console.log('[Caloriq] analyzePhoto() start — mimeType:', mimeType, '| base64 length:', base64.length);
 
   try {
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=${state.apiKey}`;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${state.apiKey}`;
     console.log('[Caloriq] Sending request to Gemini API…');
 
     const res = await fetch(apiUrl, {
@@ -886,7 +929,7 @@ function showToast(msg, success = false) {
   t_el.style.borderColor = success ? 'var(--toast-ok-border)' : 'var(--toast-err-border)';
   t_el.classList.add('show');
   clearTimeout(toastTimer);
-  toastimer = setTimeout(() => t_el.classList.remove('show'), 10000);
+  toastTimer = setTimeout(() => t_el.classList.remove('show'), 10000);
 }
 
 /* ─────────────────────────────────────────────────────────
@@ -938,6 +981,7 @@ loadState();
 applyI18n();
 if (state.screen === 'home') { renderHome(); }
 showScreen(state.screen);
+
 
 /* ─────────────────────────────────────────────────────────
    SERVICE WORKER

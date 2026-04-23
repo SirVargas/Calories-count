@@ -186,19 +186,19 @@
     </div>
     <div class="stats-content">
       <div class="stats-view-selector">
-          <button class="view-btn active" onclick="setStatsView('day')" data-i18n="statsDay">Day</button>
-          <button class="view-btn" onclick="setStatsView('week')" data-i18n="statsWeek">Week</button>
-          <button class="view-btn" onclick="setStatsView('month')" data-i18n="statsMonth">Month</button>
+          <button class="view-btn active" onclick="setStatsView('day')" data-i18n="statsDay" data-view="day">Day</button>
+          <button class="view-btn" onclick="setStatsView('week')" data-i18n="statsWeek" data-view="week">Week</button>
+          <button class="view-btn" onclick="setStatsView('month')" data-i18n="statsMonth" data-view="month">Month</button>
       </div>
-      <div class="chart-container">
+      <div class="chart-container" id="daily-calories-chart-container">
           <h3 data-i18n="dailyCalories">Daily Calories</h3>
           <canvas id="daily-calories-chart"></canvas>
       </div>
-      <div class="chart-container">
+      <div class="chart-container" id="macro-distribution-chart-container">
           <h3 data-i18n="macroDistribution">Macronutrient Distribution</h3>
           <canvas id="macro-distribution-chart"></canvas>
       </div>
-      <div class="chart-container">
+      <div class="chart-container" id="monthly-trend-chart-container" style="display:none;">
           <h3 data-i18n="monthlyTrend">Monthly Trend</h3>
           <canvas id="monthly-trend-chart"></canvas>
       </div>
@@ -214,7 +214,7 @@
       <input class="setup-input" id="api-key-input" type="password" placeholder="AIza…" autocomplete="off"/>
       <p class="setup-hint" data-i18n="apiKeyHint"></p>
     </div>
-    <button class="setup-btn" onclick="saveApiKey()" data-i18n="saveKey">Save &amp; continue</button>
+    <button class="setup-btn" onclick="saveApiKey()" data-i18n="saveKey">Save & continue</button>
   </div>
 
 </div><!-- #app -->
