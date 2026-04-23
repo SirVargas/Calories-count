@@ -5,7 +5,7 @@ const key = process.env.GEMINI_API_KEY || '';
 fs.writeFileSync('config.js',
   `const CALORIQ_CONFIG = {\n` +
   `  GEMINI_API_KEY: '${key}',\n` +
-  `  GEMINI_MODEL: 'gemini-2.0-flash-lite',\n` +
+  `  GEMINI_MODEL: 'gemini-2.5-flash-lite',\n` +
   `  DEFAULT_DAILY_GOAL: 2000,\n` +
   `};\n`
 );
