@@ -6,6 +6,12 @@
  * ║  ⚠️  NEVER deploy this file to a public CDN          ║
  * ╚══════════════════════════════════════════════════════╝
  *
+ * SETUP:
+ *   1. Copy this file to config.js:
+ *        cp config.example.js config.js
+ *   2. Paste your Gemini API key below.
+ *   3. config.js is already in .gitignore — it will NOT be committed.
+ *
  * For production:
  *   Replace this file with a server-side proxy endpoint
  *   (Cloudflare Worker, Netlify Function, etc.) so the
@@ -17,7 +23,7 @@
 
 const CALORIQ_CONFIG = {
   // Paste your Gemini API key here ↓
-  GEMINI_API_KEY: 'test',
+  GEMINI_API_KEY: '',
 
   // Model to use (flash-lite = fastest + most free-tier friendly)
   GEMINI_MODEL: 'gemini-2.0-flash-lite',

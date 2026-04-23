@@ -1,5 +1,6 @@
 # ⚠️ SECURITY: config.js contains your API key — NEVER commit it
 config.js
+!config.example.js
 
 # OS junk
 .DS_Store
