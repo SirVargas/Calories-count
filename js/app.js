@@ -34,7 +34,7 @@ const TRANSLATIONS = {
     saveGoal: 'Save goal',
     goalUpdated: '✓ Daily goal updated to',
     goalError: 'Please enter a goal between 500 and 9999 kcal',
-    mealSaved: '✓ Meal saved to today\'s log',
+    mealSaved: '✓ Meal saved to today\\\'s log',
     removeThisMeal: 'Remove this meal?',
     deleteEntry: 'This entry will be deleted from your log.',
     cancel: 'Cancel',
@@ -46,7 +46,7 @@ const TRANSLATIONS = {
     setupTitle: 'Caloriq',
     setupSub: 'Enter your Gemini API key to get started.',
     apiKeyLabel: 'Gemini API Key',
-    apiKeyHint: 'Get your free key at <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a>',
+    apiKeyHint: 'Get your free key at <a href=\"https://aistudio.google.com/app/apikey\" target=\"_blank\">aistudio.google.com</a>',
     saveKey: 'Save & continue',
     apiKeyError: 'Enter a valid Gemini API key (starts with AIza…)',
     failedLoadImage: 'Failed to load image',
@@ -105,7 +105,7 @@ const TRANSLATIONS = {
     setupTitle: 'Caloriq',
     setupSub: 'Ingresa tu clave de API de Gemini para comenzar.',
     apiKeyLabel: 'Clave API de Gemini',
-    apiKeyHint: 'Obtén tu clave gratuita en <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a>',
+    apiKeyHint: 'Obtén tu clave gratuita en <a href=\"https://aistudio.google.com/app/apikey\" target=\"_blank\">aistudio.google.com</a>',
     saveKey: 'Guardar y continuar',
     apiKeyError: 'Ingresa una clave de API de Gemini válida (comienza con AIza…)',
     failedLoadImage: 'Error al cargar imagen',
@@ -283,35 +283,35 @@ function renderHome() {
   const list = document.getElementById('meal-list');
   const meals = todayMeals().slice().reverse();
   if (!meals.length) {
-    list.innerHTML = `<div class="empty-state">
-      <div class="empty-icon">🍽️</div>
-      <p class="empty-text">${t('noMealsToday')}<br/>${t('tapToStart')}</p>
+    list.innerHTML = `<div class=\"empty-state\">
+      <div class=\"empty-icon\">🍽️</div>
+      <p class=\"empty-text\">${t('noMealsToday')}<br/>${t('tapToStart')}</p>
     </div>`;
     return;
   }
 
   list.innerHTML = meals.map(m => `
-    <div class="meal-card">
-      <div class="meal-card-inner">
+    <div class=\"meal-card\">
+      <div class=\"meal-card-inner\">
         ${m.photo
-          ? `<img class="meal-thumb" src="${m.photo}" alt="${escHtml(m.name)}"/>`
-          : `<div class="meal-thumb" style="background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:28px">🍽️</div>`}
-        <div class="meal-info">
+          ? `<img class=\"meal-thumb\" src=\"${m.photo}\" alt=\"${escHtml(m.name)}\"/>`
+          : `<div class=\"meal-thumb\" style=\"background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:28px\">🍽️</div>`}
+        <div class=\"meal-info\">
           <div>
-            <div class="meal-name">${escHtml(m.name)}</div>
-            <div class="meal-time">${m.time}</div>
+            <div class=\"meal-name\">${escHtml(m.name)}</div>
+            <div class=\"meal-time\">${m.time}</div>
           </div>
-          <div class="meal-cals-row">
-            <span><span class="meal-cals">${Math.round(m.cals)}</span><span class="meal-kcal-label"> kcal</span></span>
-            <span class="meal-macros">P ${Math.round(m.protein)}g · C ${Math.round(m.carbs)}g · F ${Math.round(m.fat)}g</span>
+          <div class=\"meal-cals-row\">
+            <span><span class=\"meal-cals\">${Math.round(m.cals)}</span><span class=\"meal-kcal-label\"> kcal</span></span>
+            <span class=\"meal-macros\">P ${Math.round(m.protein)}g · C ${Math.round(m.carbs)}g · F ${Math.round(m.fat)}g</span>
           </div>
         </div>
-        <div class="meal-actions">
-          <button class="meal-action-btn" title="${t('editMeal')}" onclick="openEditMeal('${m.id}')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        <div class=\"meal-actions\">
+          <button class=\"meal-action-btn\" title=\"${t('editMeal')}\" onclick=\"openEditMeal('${m.id}')\">
+            <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"><path d=\"M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7\"/><path d=\"M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z\"/></svg>
           </button>
-          <button class="meal-action-btn" title="${t('delete')}" onclick="askDelete('${m.id}')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          <button class=\"meal-action-btn\" title=\"${t('delete')}\" onclick=\"askDelete('${m.id}')\">
+            <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"><polyline points=\"3 6 5 6 21 6\"/><path d=\"M19 6l-1 14H6L5 6\"/><path d=\"M10 11v6M14 11v6\"/><path d=\"M9 6V4h6v2\"/></svg>
           </button>
         </div>
       </div>
@@ -559,6 +559,58 @@ Instructions:
 - Do not include any text outside the JSON object.`;
 }
 
+async function fallbackAnalysis(base64) {
+    console.log('[Caloriq] Starting fallback analysis with Hugging Face');
+    try {
+        const hfApiKey = (typeof CALORIQ_CONFIG !== 'undefined' && CALORIQ_CONFIG.HF_API_KEY) ? CALORIQ_CONFIG.HF_API_KEY : '';
+        if (!hfApiKey) {
+            throw new Error('Hugging Face API key not configured.');
+        }
+
+        const res = await fetch('https://api-inference.huggingface.co/models/Salesforce/blip-image-captioning-large', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${hfApiKey}`,
+                'Content-Type': 'application/octet-stream'
+            },
+            body: Uint8Array.from(atob(base64), c => c.charCodeAt(0))
+        });
+
+        if (!res.ok) {
+            const errorText = await res.text();
+            console.error('[Caloriq] Hugging Face API error:', res.status, errorText);
+            throw new Error(`Hugging Face API error: ${res.status}`);
+        }
+
+        const hfResult = await res.json();
+        console.log('[Caloriq] Hugging Face response:', hfResult);
+
+        const description = hfResult[0]?.generated_text;
+        if (!description) {
+            throw new Error('Could not get description from Hugging Face.');
+        }
+
+        const result = {
+            foodName: description,
+            totalCalories: 'Estimando...',
+            protein: '...',
+            carbs: '...',
+            fat: '...',
+            confidence: 'low',
+            items: [],
+            notes: 'Fallo de Gemini, usando análisis de respaldo. Ajuste los valores manualmente.'
+        };
+        
+        state.currentResult = result;
+        showResult(result);
+
+    } catch (err) {
+        console.error('[Caloriq] fallbackAnalysis() error:', err);
+        showAnalyzingError(t('analysisFailed') + ': ' + (err.message || 'Hugging Face fallback failed'));
+    }
+}
+
+
 async function analyzePhoto() {
   if (!state.currentPhoto) return;
 
@@ -593,6 +645,10 @@ async function analyzePhoto() {
     console.log('[Caloriq] Gemini response status:', res.status);
 
     if (!res.ok) {
+        if (res.status === 503 || res.status === 429) {
+            console.warn(`[Caloriq] Gemini API responded with ${res.status}, falling back to Hugging Face`);
+            return fallbackAnalysis(base64);
+        }
       const errBody = await res.json().catch(jsonErr => {
         console.error('[Caloriq] Failed to parse error response JSON:', jsonErr);
         return {};
@@ -600,7 +656,11 @@ async function analyzePhoto() {
       console.error('[Caloriq] Gemini API error body:', errBody);
       const errMsg = errBody?.error?.message || `HTTP ${res.status}`;
       const isQuota = res.status === 429 || errMsg.toLowerCase().includes('quota');
-      throw new Error(isQuota ? t('quotaExceeded') + ' — ' + errMsg : errMsg);
+      if (isQuota) {
+          console.warn(`[Caloriq] Gemini API quota exceeded, falling back to Hugging Face`);
+          return fallbackAnalysis(base64);
+      }
+      throw new Error(errMsg);
     }
 
     const data = await res.json();
@@ -630,31 +690,41 @@ async function analyzePhoto() {
 function showResult(r) {
   document.getElementById('result-img').src = state.currentPhoto;
   document.getElementById('result-food-name').textContent = r.foodName || t('yourMeal');
-  document.getElementById('result-cals').textContent = Math.round(r.totalCalories);
-  document.getElementById('r-protein').textContent = Math.round(r.protein);
-  document.getElementById('r-carbs').textContent = Math.round(r.carbs);
-  document.getElementById('r-fat').textContent = Math.round(r.fat);
+  
+  document.getElementById('result-cals').textContent = (typeof r.totalCalories === 'number') ? Math.round(r.totalCalories) : r.totalCalories;
+  document.getElementById('r-protein').textContent = (typeof r.protein === 'number') ? Math.round(r.protein) : r.protein;
+  document.getElementById('r-carbs').textContent = (typeof r.carbs === 'number') ? Math.round(r.carbs) : r.carbs;
+  document.getElementById('r-fat').textContent = (typeof r.fat === 'number') ? Math.round(r.fat) : r.fat;
 
   const conf = r.confidence || 'medium';
   const confMap = { high: t('highConf'), medium: t('medConf'), low: t('lowConf') };
   document.getElementById('confidence-text').textContent = confMap[conf] || confMap.medium;
 
   const itemsList = document.getElementById('items-list');
-  itemsList.innerHTML = (r.items || []).map(i => `
-    <div class="item-row">
-      <span class="item-name">${escHtml(i.name)}</span>
-      <span class="item-cals">${Math.round(i.calories)} kcal</span>
-    </div>
-  `).join('') || `<div class="item-row"><span class="item-name" style="color:var(--text3)">${t('noItemsDetected')}</span></div>`;
+  let itemsHtml = '';
+  if (r.items && r.items.length > 0) {
+    itemsHtml = r.items.map(i => `
+      <div class="item-row">
+        <span class="item-name">${escHtml(i.name)}</span>
+        <span class="item-cals">${Math.round(i.calories)} kcal</span>
+      </div>
+    `).join('');
+  } else if (r.notes) {
+      itemsHtml = `<div class="item-row"><span class="item-name" style="color:var(--text3)">${escHtml(r.notes)}</span></div>`;
+  } else {
+      itemsHtml = `<div class="item-row"><span class="item-name" style="color:var(--text3)">${t('noItemsDetected')}</span></div>`;
+  }
+  itemsList.innerHTML = itemsHtml;
 
   document.getElementById('edit-name').value = r.foodName || '';
-  document.getElementById('edit-cals').value = Math.round(r.totalCalories);
-  document.getElementById('edit-protein').value = Math.round(r.protein);
-  document.getElementById('edit-carbs').value = Math.round(r.carbs);
-  document.getElementById('edit-fat').value = Math.round(r.fat);
+  document.getElementById('edit-cals').value = (typeof r.totalCalories === 'number') ? Math.round(r.totalCalories) : '';
+  document.getElementById('edit-protein').value = (typeof r.protein === 'number') ? Math.round(r.protein) : '';
+  document.getElementById('edit-carbs').value = (typeof r.carbs === 'number') ? Math.round(r.carbs) : '';
+  document.getElementById('edit-fat').value = (typeof r.fat === 'number') ? Math.round(r.fat) : '';
 
   showScreen('result');
 }
+
 
 /* ─────────────────────────────────────────────────────────
    SAVE MEAL
@@ -801,7 +871,7 @@ function escHtml(s) {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+    .replace(/\"/g, '&quot;');
 }
 
 /* ─────────────────────────────────────────────────────────
@@ -817,7 +887,7 @@ function applyTheme(theme) {
       const icon = document.getElementById(id);
       if (icon) icon.style.display = theme === 'light' ? '' : 'none';
   });
-  document.querySelector('meta[name="theme-color"]').content = theme === 'dark' ? '#0f1a14' : '#f5f7f3';
+  document.querySelector('meta[name=\"theme-color\"]').content = theme === 'dark' ? '#0f1a14' : '#f5f7f3';
 }
 
 function toggleTheme() {
