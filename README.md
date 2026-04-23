@@ -10,25 +10,20 @@ Solo necesitas hacer esto **una vez**:
 
 Ve a [aistudio.google.com/apikey](https://aistudio.google.com/apikey) y crea una key gratis.
 
-### 2. Guardarla como secreto en tu repo
+### 2. Guardarla en Netlify
 
-1. En tu repo de GitHub, ve a **Settings** → **Secrets and variables** → **Actions**
-2. Tap **New repository secret**
-3. Name: `GEMINI_API_KEY`
-4. Secret: pega tu key (empieza con `AIza...`)
-5. Tap **Add secret**
+1. Abre [app.netlify.com](https://app.netlify.com) y entra a tu sitio **calories-count-app**
+2. Ve a **Site configuration** → **Environment variables**
+3. Tap **Add a variable**
+4. Key: `GEMINI_API_KEY`
+5. Values: pega tu key (`AIza...`)
+6. Tap **Create variable**
 
-### 3. Activar GitHub Pages
+### 3. Redeploy
 
-1. En tu repo, ve a **Settings** → **Pages**
-2. En **Source**, selecciona **GitHub Actions**
-3. Listo
+Ve a **Deploys** → tap **Trigger deploy** → **Deploy site**. Listo, la app abrirá directo sin pedir la key.
 
-### 4. Deploy
-
-Cada vez que hagas push a `main`, GitHub Actions genera `config.js` con tu key (desde el secreto) y despliega la app a GitHub Pages automáticamente. Tu key **nunca aparece en los archivos del repo**.
-
-También puedes ir a la pestaña **Actions** y correr el workflow manualmente con **Run workflow**.
+Cada vez que hagas push a `main`, Netlify genera `config.js` con tu key automáticamente. La key **nunca aparece en los archivos del repo**.
 
 ## Desarrollo local
 
