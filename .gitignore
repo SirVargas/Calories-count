@@ -1,5 +1,4 @@
-# ⚠️ SECURITY: config.js was removed — API keys are stored in
-# the browser's localStorage, never in the repo.
+# API key — generated at deploy time by GitHub Actions, never committed
 config.js
 
 # OS junk

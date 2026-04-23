@@ -7,6 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <title>Caloriq</title>
+<script src="config.js"></script>
 <link rel="manifest" href="manifest.json"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
@@ -402,6 +403,14 @@ function loadState() {
       state.meals = saved.meals || [];
     }
   } catch(e) {}
+
+  if (typeof CALORIQ_CONFIG !== 'undefined' && CALORIQ_CONFIG.GEMINI_API_KEY) {
+    state.apiKey = CALORIQ_CONFIG.GEMINI_API_KEY;
+  }
+  if (typeof CALORIQ_CONFIG !== 'undefined' && CALORIQ_CONFIG.DEFAULT_DAILY_GOAL && !localStorage.getItem(DB_KEY)) {
+    state.dailyGoal = CALORIQ_CONFIG.DEFAULT_DAILY_GOAL;
+  }
+
   state.screen = state.apiKey ? 'home' : 'setup';
 }
 
