@@ -651,7 +651,7 @@ async function analyzePhoto() {
   console.log('[Caloriq] analyzePhoto() start — mimeType:', mimeType, '| base64 length:', base64.length);
 
   try {
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=${state.apiKey}`;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${state.apiKey}`;
     console.log('[Caloriq] Sending request to Gemini API…');
 
     const res = await fetch(apiUrl, {
