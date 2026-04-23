@@ -1,265 +1,309 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<meta name="theme-color" content="#0f1a14"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<title>Caloriq</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="config.js"></script>
-<link rel="manifest" href="manifest.json"/>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="css/style.css"/>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0f1a14">
+  <title data-i18n="appTitle">Calori</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="img/logo/192.png">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="js/config.js"></script>
 </head>
 <body>
-<div id="app">
-
-  <!-- ══ HOME SCREEN ══════════════════════════════════ -->
-  <div id="screen-home" class="screen hidden">
-    <div class="topbar">
-      <span class="topbar-title">Calori<span class="q-animate">q</span></span>
-      <div class="topbar-actions">
-        <button class="icon-btn" id="lang-btn" onclick="toggleLang()" title="Switch language">ES</button>
-        <button class="icon-btn" onclick="renderStats(); showScreen('stats');" title="View stats">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-            <path d="M12 20V10M18 20V4M6 20v-4"/>
-          </svg>
-        </button>
-        <button class="icon-btn" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle light/dark mode">
-          <svg id="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
-          <svg id="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" style="display:none"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-        </button>
+  <div id="app">
+    <!-- ─────────────────────────────────────────────────────────
+         HOME SCREEN
+    ───────────────────────────────────────────────────────── -->
+    <div id="screen-home" class="screen">
+      <div class="topbar">
+        <div class="topbar-title" data-i18n="appTitle">Calori<span class="q-animate">q</span></div>
+        <div class="topbar-actions">
+          <button class="icon-btn" onclick="toggleLang()" id="lang-btn">ES</button>
+          <button class="icon-btn theme-btn" onclick="toggleTheme()">
+            <svg id="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            <svg id="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          </button>
+          <button class="icon-btn" onclick="goStats()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2.5 2v6h6M2.6 15h-1A2.4 2.4 0 0 1 4 10.5M22 17v-6h-6M21.4 9h1a2.4 2.4 0 0 1-2.5 4.5"/></svg>
+          </button>
+        </div>
       </div>
-    </div>
 
-    <div id="daily-strip">
-      <div class="strip-row">
-        <span class="strip-date" id="strip-date"></span>
-        <span class="strip-goal-edit" onclick="openGoalModal()" data-i18n="editGoal">Edit goal</span>
-      </div>
-      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:8px;">
+      <div id="daily-strip">
+        <div class="strip-row">
+          <div id="strip-date" class="strip-date"></div>
+          <div class="strip-goal-edit" onclick="openGoalModal()" data-i18n="editGoal">Edit goal</div>
+        </div>
         <div class="strip-cals">
           <span class="big" id="strip-cal-num">0</span>
-          <span class="unit">kcal</span>
-          <span class="goal"> / <span id="strip-goal-num">2000</span></span>
+          <span class="unit">/ <span id="strip-goal-num">2000</span> kcal</span>
         </div>
-      </div>
-      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
-      <div class="macro-row">
-        <div class="macro-chip"><div class="mval" id="h-protein">0g</div><div class="mlabel" data-i18n="protein">Protein</div></div>
-        <div class="macro-chip"><div class="mval" id="h-carbs">0g</div><div class="mlabel" data-i18n="carbs">Carbs</div></div>
-        <div class="macro-chip"><div class="mval" id="h-fat">0g</div><div class="mlabel" data-i18n="fat">Fat</div></div>
-      </div>
-    </div>
-
-    <div id="meal-list"></div>
-
-    <button id="fab" onclick="goCapture()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-      <span data-i18n="logMeal">Log a meal</span>
-    </button>
-  </div>
-
-  <!-- ══ CAPTURE SCREEN ══════════════════════════════ -->
-  <div id="screen-capture" class="screen hidden">
-    <button class="screen-back" onclick="goHome()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-    </button>
-    <div id="preview-wrap">
-      <div id="preview-placeholder">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-        <span style="font-size:14px" data-i18n="selectPhoto">Select or take a photo of your meal</span>
-      </div>
-      <img id="preview-img" style="display:none" alt=""/>
-      <div class="capture-overlay">
-        <div class="capture-corner tl"></div>
-        <div class="capture-corner tr"></div>
-        <div class="capture-corner bl"></div>
-        <div class="capture-corner br"></div>
-      </div>
-    </div>
-    <div id="capture-bar">
-      <input type="file" id="file-input" accept="image/*"/>
-      <button class="cap-btn" onclick="document.getElementById('file-input').removeAttribute('capture'); document.getElementById('file-input').click()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-        <span data-i18n="gallery">Gallery</span>
-      </button>
-      <button class="cap-btn" onclick="document.getElementById('file-input').setAttribute('capture','environment'); document.getElementById('file-input').click()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-        <span data-i18n="camera">Camera</span>
-      </button>
-      <button class="cap-btn primary" id="analyze-btn" disabled onclick="analyzePhoto()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-        <span data-i18n="analyze">Analyze</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- ══ ANALYZING SCREEN ════════════════════════════ -->
-  <div id="screen-analyzing" class="screen hidden">
-    <div id="analyzing-progress">
-      <div style="position:relative;display:flex;align-items:center;justify-content:center;">
-        <div class="analyzing-pulse"></div>
-        <img id="analyzing-img" class="analyzing-img" src="" alt=""/>
-      </div>
-      <p class="analyzing-label dot-anim" data-i18n="identifyingMeal">Identifying your meal</p>
-      <p class="analyzing-sub" data-i18n="takesSeconds">This takes a few seconds</p>
-    </div>
-    <div id="analyzing-error">
-      <div class="analyzing-error-icon">⚠️</div>
-      <div class="analyzing-error-msg" id="analyzing-error-msg"></div>
-      <button class="analyzing-back-btn" onclick="goCapture()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-        <span data-i18n="goBack">Go back</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- ══ RESULT SCREEN ═══════════════════════════════ -->
-  <div id="screen-result" class="screen hidden">
-    <button class="screen-back" onclick="goCapture()" style="z-index:5;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-    </button>
-    <div class="result-img-wrap">
-      <img id="result-img" class="result-img" src="" alt=""/>
-      <div class="result-img-overlay"></div>
-    </div>
-    <div class="result-body">
-      <div id="result-food-name" class="result-food-name"></div>
-      <div style="display:flex;align-items:baseline;gap:4px;margin:6px 0 4px;">
-        <span id="result-cals" class="result-cals-big">—</span>
-        <span class="result-cals-label" data-i18n="kcalEstimated">kcal estimated</span>
-      </div>
-      <div id="result-confidence" class="confidence-badge">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        <span id="confidence-text"></span>
-      </div>
-
-      <div class="result-section">
-        <div class="result-section-title" data-i18n="macronutrients">Macronutrients</div>
-        <div class="macro-grid">
-          <div class="macro-card"><div class="mval" id="r-protein">—</div><div class="munit">g</div><div class="mname" data-i18n="protein">Protein</div></div>
-          <div class="macro-card"><div class="mval" id="r-carbs">—</div><div class="munit">g</div><div class="mname" data-i18n="carbs">Carbs</div></div>
-          <div class="macro-card"><div class="mval" id="r-fat">—</div><div class="munit">g</div><div class="mname" data-i18n="fat">Fat</div></div>
+        <div class="progress-bar">
+          <div id="progress-fill" style="width:0%"></div>
+        </div>
+        <div class="macro-row">
+          <div class="macro-chip"><div class="mval" id="h-protein">0g</div><div class="mlabel" data-i18n="protein">Protein</div></div>
+          <div class="macro-chip"><div class="mval" id="h-carbs">0g</div><div class="mlabel" data-i18n="carbs">Carbs</div></div>
+          <div class="macro-chip"><div class="mval" id="h-fat">0g</div><div class="mlabel" data-i18n="fat">Fat</div></div>
         </div>
       </div>
 
-      <div class="result-section">
-        <div class="result-section-title" data-i18n="itemsDetected">Items detected</div>
-        <div class="items-list" id="items-list"></div>
-      </div>
+      <div id="meal-list"></div>
 
-      <div class="result-section edit-section">
-        <div class="result-section-title" data-i18n="adjustValues">Adjust values</div>
-        <div class="edit-row"><span class="edit-label" data-i18n="name">Name</span><input class="edit-input" id="edit-name" type="text"/></div>
-        <div class="edit-row"><span class="edit-label" data-i18n="calories">Calories</span><input class="edit-input" id="edit-cals" type="number" min="0"/><span class="edit-unit">kcal</span></div>
-        <div class="edit-row"><span class="edit-label" data-i18n="protein">Protein</span><input class="edit-input" id="edit-protein" type="number" min="0"/><span class="edit-unit">g</span></div>
-        <div class="edit-row"><span class="edit-label" data-i18n="carbs">Carbs</span><input class="edit-input" id="edit-carbs" type="number" min="0"/><span class="edit-unit">g</span></div>
-        <div class="edit-row"><span class="edit-label" data-i18n="fat">Fat</span><input class="edit-input" id="edit-fat" type="number" min="0"/><span class="edit-unit">g</span></div>
-      </div>
-
-      <div class="result-actions">
-        <button class="btn" onclick="goCapture()" data-i18n="retake">Retake</button>
-        <button class="btn primary" onclick="saveMeal()" data-i18n="saveToLog">Save to log →</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ STATS SCREEN ══════════════════════════════════ -->
-  <div id="screen-stats" class="screen hidden" style="overflow-y: auto;">
-    <div class="topbar">
-      <button class="icon-btn" onclick="goHome()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      <button id="fab" onclick="goCapture()">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 5.5c-3.3 0-6 2.7-6 6s2.7 6 6 6 6-2.7 6-6-2.7-6-6-6zm0 10.5c-2.5 0-4.5-2-4.5-4.5s2-4.5 4.5-4.5 4.5 2 4.5 4.5-2 4.5-4.5 4.5z"/><path d="M12 3C7 3 3 7 3 12s4 9 9 9 9-4 9-9-4-9-9-9zm0 16.5c-4.1 0-7.5-3.4-7.5-7.5S7.9 4.5 12 4.5s7.5 3.4 7.5 7.5-3.4 7.5-7.5 7.5z"/></svg>
+        <span data-i18n="logMeal">Log a meal</span>
       </button>
-      <span class="topbar-title" data-i18n="statsTitle">Statistics</span>
-      <div class="topbar-actions">
-        <button class="icon-btn" id="lang-btn-stats" onclick="toggleLang()" title="Switch language">ES</button>
-        <button class="icon-btn" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle light/dark mode">
-          <svg id="theme-icon-dark-stats" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
-          <svg id="theme-icon-light-stats" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" style="display:none"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+    </div>
+
+    <!-- ─────────────────────────────────────────────────────────
+         CAPTURE SCREEN
+    ───────────────────────────────────────────────────────── -->
+    <div id="screen-capture" class="screen hidden">
+      <button class="screen-back" onclick="goHome()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </button>
+      <div id="preview-wrap">
+        <div id="preview-placeholder">
+          <svg viewBox="0 0 24 24" stroke-width="1" fill="none" stroke="currentColor"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <span data-i18n="selectPhoto">Select or take a photo of your meal</span>
+        </div>
+        <img id="preview-img" style="display:none"/>
+        <div class="capture-overlay">
+          <div class="capture-corner tl"></div><div class="capture-corner tr"></div>
+          <div class="capture-corner bl"></div><div class="capture-corner br"></div>
+        </div>
+      </div>
+      <div id="capture-bar">
+        <button class="cap-btn" onclick="document.getElementById('file-input').click()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <span data-i18n="gallery">Gallery</span>
+        </button>
+        <input type="file" id="file-input" accept="image/*">
+        <button class="cap-btn" onclick="document.getElementById('file-input').click()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+          <span data-i18n="camera">Camera</span>
+        </button>
+        <button class="cap-btn primary" id="analyze-btn" onclick="analyzePhoto()" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3C7 3 3 7 3 12s4 9 9 9 9-4 9-9-4-9-9-9z"/><path d="M10 12h4"/></svg>
+          <span data-i18n="analyze">Analyze</span>
         </button>
       </div>
     </div>
-    <div class="stats-content">
-      <div class="stats-view-selector">
-          <button class="view-btn active" onclick="setStatsView('day')" data-i18n="statsDay" data-view="day">Day</button>
-          <button class="view-btn" onclick="setStatsView('week')" data-i18n="statsWeek" data-view="week">Week</button>
-          <button class="view-btn" onclick="setStatsView('month')" data-i18n="statsMonth" data-view="month">Month</button>
+
+    <!-- ─────────────────────────────────────────────────────────
+         ANALYZING SCREEN
+    ───────────────────────────────────────────────────────── -->
+    <div id="screen-analyzing" class="screen hidden">
+      <div class="analyzing-pulse"></div>
+      <img id="analyzing-img" class="analyzing-img"/>
+      <div id="analyzing-progress">
+        <div class="analyzing-label"><span data-i18n="identifyingMeal">Identifying your meal</span><span class="dot-anim"></span></div>
+        <div class="analyzing-sub" data-i18n="takesSeconds">This takes a few seconds</div>
       </div>
-      <div class="chart-container" id="daily-calories-chart-container">
-          <h3 data-i18n="dailyCalories">Daily Calories</h3>
-          <canvas id="daily-calories-chart"></canvas>
-      </div>
-      <div class="chart-container" id="macro-distribution-chart-container">
-          <h3 data-i18n="macroDistribution">Macronutrient Distribution</h3>
-          <canvas id="macro-distribution-chart"></canvas>
-      </div>
-      <div class="chart-container" id="monthly-trend-chart-container" style="display:none;">
-          <h3 data-i18n="monthlyTrend">Monthly Trend</h3>
-          <canvas id="monthly-trend-chart"></canvas>
+      <div id="analyzing-error">
+        <div class="analyzing-error-icon">⚠️</div>
+        <div id="analyzing-error-msg"></div>
+        <button class="analyzing-back-btn" onclick="goCapture()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M15 18l-6-6 6-6"/></svg>
+          <span data-i18n="goBack">Go back</span>
+        </button>
       </div>
     </div>
-  </div>
 
-  <!-- ══ API KEY SETUP ════════════════════════════════ -->
-  <div id="screen-setup" class="screen hidden">
-    <div class="setup-logo">Calori<span style="color:var(--accent)">q</span></div>
-    <p class="setup-sub" data-i18n="setupSub">Enter your Gemini API key to get started.</p>
-    <div class="setup-input-wrap">
-      <div class="setup-label" data-i18n="apiKeyLabel">Gemini API Key</div>
-      <input class="setup-input" id="api-key-input" type="password" placeholder="AIza…" autocomplete="off"/>
-      <p class="setup-hint" data-i18n="apiKeyHint"></p>
+    <!-- ─────────────────────────────────────────────────────────
+         RESULT SCREEN
+    ───────────────────────────────────────────────────────── -->
+    <div id="screen-result" class="screen hidden">
+      <button class="screen-back" onclick="goHome()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </button>
+      <div class="result-img-wrap">
+        <img id="result-img" class="result-img"/>
+        <div class="result-img-overlay"></div>
+      </div>
+      <div class="result-body">
+        <h2 id="result-food-name" class="result-food-name"></h2>
+        <div>
+          <span id="result-cals" class="result-cals-big">0</span>
+          <span class="result-cals-label" data-i18n="kcalEstimated">kcal estimated</span>
+        </div>
+        <div id="confidence-text" class="confidence-badge"></div>
+
+        <div class="result-section edit-section">
+          <div class="edit-row">
+            <label for="edit-name" class="edit-label" data-i18n="name">Name</label>
+            <input type="text" id="edit-name" class="edit-input">
+            <div class="edit-unit"></div>
+          </div>
+        </div>
+
+        <div class="result-section">
+          <h3 class="result-section-title" data-i18n="macronutrients">Macronutrients</h3>
+          <div class="macro-grid">
+            <div class="macro-card"><div class="mval"><span id="r-protein">0</span><span class="munit">g</span></div><div class="mname" data-i18n="protein">Protein</div></div>
+            <div class="macro-card"><div class="mval"><span id="r-carbs">0</span><span class="munit">g</span></div><div class="mname" data-i18n="carbs">Carbs</div></div>
+            <div class="macro-card"><div class="mval"><span id="r-fat">0</span><span class="munit">g</span></div><div class="mname" data-i18n="fat">Fat</div></div>
+          </div>
+        </div>
+
+        <div class="result-section">
+          <h3 class="result-section-title" data-i18n="itemsDetected">Items detected</h3>
+          <div id="items-list" class="items-list"></div>
+        </div>
+
+        <div class="result-section edit-section">
+          <div class="edit-row">
+            <label for="edit-cals" class="edit-label" data-i18n="calories">Calories</label>
+            <input type="number" id="edit-cals" class="edit-input">
+            <div class="edit-unit">kcal</div>
+          </div>
+          <div class="edit-row">
+            <label for="edit-protein" class="edit-label" data-i18n="protein">Protein</label>
+            <input type="number" id="edit-protein" class="edit-input">
+            <div class="edit-unit">g</div>
+          </div>
+          <div class="edit-row">
+            <label for="edit-carbs" class="edit-label" data-i18n="carbs">Carbs</label>
+            <input type="number" id="edit-carbs" class="edit-input">
+            <div class="edit-unit">g</div>
+          </div>
+          <div class="edit-row">
+            <label for="edit-fat" class="edit-label" data-i18n="fat">Fat</label>
+            <input type="number" id="edit-fat" class="edit-input">
+            <div class="edit-unit">g</div>
+          </div>
+        </div>
+        <div class="result-actions">
+          <button class="btn" onclick="goCapture()" data-i18n="retake">Retake</button>
+          <button class="btn primary" onclick="saveMeal()" data-i18n="saveToLog">Save to log →</button>
+        </div>
+      </div>
     </div>
-    <button class="setup-btn" onclick="saveApiKey()" data-i18n="saveKey">Save & continue</button>
-  </div>
 
-</div><!-- #app -->
-
-<!-- ══ GOAL MODAL ══════════════════════════════════════ -->
-<div id="goal-modal">
-  <div class="modal-sheet">
-    <div class="modal-title" data-i18n="dailyCalGoal">Daily calorie goal</div>
-    <p class="modal-sub" data-i18n="setTarget">Set your target for the day.</p>
-    <input class="modal-input" id="goal-input" type="number" min="500" max="9999" placeholder="2000"/>
-    <button class="modal-save" onclick="saveGoal()" data-i18n="saveGoal">Save goal</button>
-  </div>
-</div>
-
-<!-- ══ EDIT MEAL MODAL ════════════════════════════════ -->
-<div id="edit-meal-modal">
-  <div class="modal-sheet">
-    <div class="modal-title" data-i18n="editMeal">Edit meal</div>
-    <div class="edit-row" style="margin-top:16px"><span class="edit-label" data-i18n="name">Name</span><input class="edit-input" id="edit-meal-name" type="text"/></div>
-    <div class="edit-row"><span class="edit-label" data-i18n="calories">Calories</span><input class="edit-input" id="edit-meal-cals" type="number" min="0"/><span class="edit-unit">kcal</span></div>
-    <div class="edit-row"><span class="edit-label" data-i18n="protein">Protein</span><input class="edit-input" id="edit-meal-protein" type="number" min="0"/><span class="edit-unit">g</span></div>
-    <div class="edit-row"><span class="edit-label" data-i18n="carbs">Carbs</span><input class="edit-input" id="edit-meal-carbs" type="number" min="0"/><span class="edit-unit">g</span></div>
-    <div class="edit-row"><span class="edit-label" data-i18n="fat">Fat</span><input class="edit-input" id="edit-meal-fat" type="number" min="0"/><span class="edit-unit">g</span></div>
-    <div style="display:flex;gap:10px;margin-top:14px;">
-      <button class="btn" onclick="closeEditMeal()" data-i18n="cancel">Cancel</button>
-      <button class="btn primary" onclick="saveEditMeal()" data-i18n="saveChanges">Save changes</button>
+    <!-- ─────────────────────────────────────────────────────────
+         STATS SCREEN
+    ───────────────────────────────────────────────────────── -->
+    <div id="screen-stats" class="screen hidden">
+        <div class="topbar">
+          <button class="icon-btn" onclick="goHome()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          </button>
+          <div class="topbar-title" data-i18n="statsTitle">Statistics</div>
+          <div class="topbar-actions">
+            <button class="icon-btn" onclick="toggleLang()" id="lang-btn-stats">ES</button>
+            <button class="icon-btn theme-btn" onclick="toggleTheme()">
+                <svg id="theme-icon-dark-stats" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                <svg id="theme-icon-light-stats" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="stats-content">
+            <div class="stats-view-selector">
+                <button class="view-btn active" data-view="day" onclick="setStatsView('day')" data-i18n="statsDay">Day</button>
+                <button class="view-btn" data-view="week" onclick="setStatsView('week')" data-i18n="statsWeek">Week</button>
+                <button class="view-btn" data-view="month" onclick="setStatsView('month')" data-i18n="statsMonth">Month</button>
+            </div>
+            <div id="daily-calories-chart-container" class="chart-container">
+                <h3 data-i18n="dailyCalories">Daily Calories</h3>
+                <canvas id="daily-calories-chart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3 data-i18n="macroDistribution">Macro Distribution</h3>
+                <canvas id="macro-distribution-chart"></canvas>
+            </div>
+            <div id="monthly-trend-chart-container" class="chart-container">
+                <h3 data-i18n="calorieTrend">Calorie Trend</h3>
+                <canvas id="monthly-trend-chart"></canvas>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 
-<!-- ══ DELETE CONFIRM ══════════════════════════════════ -->
-<div id="delete-modal">
-  <div class="delete-card">
-    <div class="delete-title" data-i18n="removeThisMeal">Remove this meal?</div>
-    <p class="delete-sub" data-i18n="deleteEntry">This entry will be deleted from your log.</p>
-    <div class="delete-btns">
-      <button class="delete-cancel" onclick="closeDeleteModal()" data-i18n="cancel">Cancel</button>
-      <button class="delete-confirm" onclick="confirmDelete()" data-i18n="delete">Delete</button>
+
+    <!-- ─────────────────────────────────────────────────────────
+         SETUP SCREEN
+    ───────────────────────────────────────────────────────── -->
+    <div id="screen-setup" class="screen hidden">
+      <div class="setup-content">
+        <div class="setup-logo">Caloriq</div>
+        <p class="setup-sub" data-i18n="setupSub">Enter your Gemini API key to get started.</p>
+        <div class="setup-input-wrap">
+          <label for="api-key-input" class="setup-label" data-i18n="apiKeyLabel">Gemini API Key</label>
+          <input type="password" id="api-key-input" class="setup-input" data-i18n-placeholder="apiKeyHint">
+          <p class="setup-hint" data-i18n="apiKeyHint">Get your free key at <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a></p>
+        </div>
+        <button class="setup-btn" onclick="saveApiKey()" data-i18n="saveKey">Save & continue</button>
+      </div>
     </div>
+
+    <!-- ─────────────────────────────────────────────────────────
+         GOAL MODAL
+    ───────────────────────────────────────────────────────── -->
+    <div id="goal-modal" onclick="this.classList.remove('open')">
+      <div class="modal-sheet" onclick="event.stopPropagation()">
+        <h3 class="modal-title" data-i18n="dailyCalGoal">Daily calorie goal</h3>
+        <p class="modal-sub" data-i18n="setTarget">Set your target for the day.</p>
+        <input id="goal-input" type="number" class="modal-input">
+        <button class="modal-save" onclick="saveGoal()" data-i18n="saveGoal">Save goal</button>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────────────────────────────────
+         EDIT MEAL MODAL
+    ───────────────────────────────────────────────────────── -->
+    <div id="edit-meal-modal" onclick="this.classList.remove('open')">
+      <div class="modal-sheet" onclick="event.stopPropagation()">
+        <h3 class="modal-title" data-i18n="editMeal">Edit meal</h3>
+        <div class="result-section edit-section" style="margin-top:20px">
+            <div class="edit-row">
+                <label for="edit-meal-name" class="edit-label" data-i18n="name">Name</label>
+                <input type="text" id="edit-meal-name" class="edit-input">
+            </div>
+            <div class="edit-row">
+                <label for="edit-meal-cals" class="edit-label" data-i18n="calories">Calories</label>
+                <input type="number" id="edit-meal-cals" class="edit-input">
+            </div>
+            <div class="edit-row">
+                <label for="edit-meal-protein" class="edit-label" data-i18n="protein">Protein</label>
+                <input type="number" id="edit-meal-protein" class="edit-input">
+            </div>
+            <div class="edit-row">
+                <label for="edit-meal-carbs" class="edit-label" data-i18n="carbs">Carbs</label>
+                <input type="number" id="edit-meal-carbs" class="edit-input">
+            </div>
+            <div class="edit-row">
+                <label for="edit-meal-fat" class="edit-label" data-i18n="fat">Fat</label>
+                <input type="number" id="edit-meal-fat" class="edit-input">
+            </div>
+        </div>
+        <button class="modal-save" onclick="saveEditMeal()" data-i18n="saveChanges">Save changes</button>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────────────────────────────────
+         DELETE MODAL
+    ───────────────────────────────────────────────────────── -->
+    <div id="delete-modal" onclick="this.classList.remove('open')">
+      <div class="delete-card" onclick="event.stopPropagation()">
+        <h3 class="delete-title" data-i18n="removeThisMeal">Remove this meal?</h3>
+        <p class="delete-sub" data-i18n="deleteEntry">This entry will be deleted from your log.</p>
+        <div class="delete-btns">
+          <button class="delete-cancel" onclick="closeDeleteModal()" data-i18n="cancel">Cancel</button>
+          <button class="delete-confirm" onclick="confirmDelete()" data-i18n="delete">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast"></div>
   </div>
-</div>
 
-<!-- ══ TOAST ═══════════════════════════════════════════ -->
-<div id="toast"></div>
-
-<script src="js/app.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>

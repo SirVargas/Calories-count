@@ -59,7 +59,7 @@ const TRANSLATIONS = {
     statsMonth: 'Month',
     dailyCalories: 'Daily Calories',
     macroDistribution: 'Macro Distribution',
-    monthlyTrend: 'Monthly Trend',
+    calorieTrend: 'Calorie Trend',
   },
   es: {
     appTitle: 'Calori',
@@ -118,7 +118,7 @@ const TRANSLATIONS = {
     statsMonth: 'Mes',
     dailyCalories: 'Calorías Diarias',
     macroDistribution: 'Distribución de Macros',
-    monthlyTrend: 'Tendencia Mensual',
+    calorieTrend: 'Tendencia de Calorías',
   }
 };
 
@@ -344,46 +344,20 @@ function getChartColors() {
 function renderStats() {
     const colors = getChartColors();
 
-    // Destroy existing charts to prevent memory leaks
+    // Destroy existing charts
     if (state.charts.daily) state.charts.daily.destroy();
-    if (state.charts.monthly) state.charts.monthly.destroy();
+    if (state.charts.trend) state.charts.trend.destroy();
     if (state.charts.macro) state.charts.macro.destroy();
 
-    const isMonthView = state.statsView === 'month';
-    
-    // Show/hide the correct chart containers
-    document.getElementById('daily-calories-chart-container').style.display = isMonthView ? 'none' : 'block';
-    document.getElementById('monthly-trend-chart-container').style.display = isMonthView ? 'block' : 'none';
+    const view = state.statsView; // 'day', 'week', or 'month'
 
-    if (isMonthView) {
-        // MONTH VIEW: Show monthly trend line chart
-        const monthlyData = getPeriodData(12, 'month');
-        state.charts.monthly = new Chart(document.getElementById('monthly-trend-chart'), {
-            type: 'line',
-            data: {
-                labels: monthlyData.labels,
-                datasets: [{
-                    label: t('calories'),
-                    data: monthlyData.calories,
-                    borderColor: colors.accent,
-                    tension: 0.2,
-                    pointBackgroundColor: colors.accent,
-                }]
-            },
-            options: {
-                plugins: {
-                    legend: { display: false },
-                    tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${Math.round(c.raw)} kcal` } }
-                },
-                scales: {
-                    y: { grid: { color: colors.border }, ticks: { color: colors.text2 } },
-                    x: { grid: { color: colors.border }, ticks: { color: colors.text2 } }
-                }
-            }
-        });
-    } else {
-        // DAY/WEEK VIEW: Show daily/weekly bar chart
-        const isDayView = state.statsView === 'day';
+    const dailyContainer = document.getElementById('daily-calories-chart-container');
+    const trendContainer = document.getElementById('monthly-trend-chart-container');
+
+    // Daily/Weekly Bar Chart
+    if (view === 'day' || view === 'week') {
+        dailyContainer.style.display = 'block';
+        const isDayView = view === 'day';
         const periodData = getPeriodData(isDayView ? 7 : 4, isDayView ? 'day' : 'week');
         state.charts.daily = new Chart(document.getElementById('daily-calories-chart'), {
             type: 'bar',
@@ -407,12 +381,46 @@ function renderStats() {
                 }
             }
         });
+    } else {
+        dailyContainer.style.display = 'none';
     }
 
-    // MACRO CHART (visible in all views)
+    // Trend Line Chart (shown in all views)
+    trendContainer.style.display = 'block';
+    let trendData;
+    if (view === 'month') {
+        trendData = getPeriodData(12, 'month'); // 12 months for month view
+    } else {
+        trendData = getPeriodData(30, 'day'); // 30 days for day/week view
+    }
+    state.charts.trend = new Chart(document.getElementById('monthly-trend-chart'), {
+        type: 'line',
+        data: {
+            labels: trendData.labels,
+            datasets: [{
+                label: t('calories'),
+                data: trendData.calories,
+                borderColor: colors.accent,
+                tension: 0.2,
+                pointBackgroundColor: colors.accent,
+            }]
+        },
+        options: {
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: (c) => `${Math.round(c.raw)} kcal` } }
+            },
+            scales: {
+                y: { grid: { color: colors.border }, ticks: { color: colors.text2 } },
+                x: { grid: { color: colors.border }, ticks: { color: colors.text2, autoSkip: true, maxTicksLimit: view === 'month' ? 12 : 10 } }
+            }
+        }
+    });
+
+    // Macro Doughnut Chart
     let macroPeriodDays;
-    if (state.statsView === 'day') macroPeriodDays = 1;
-    else if (state.statsView === 'week') macroPeriodDays = 7;
+    if (view === 'day') macroPeriodDays = 1;
+    else if (view === 'week') macroPeriodDays = 7;
     else macroPeriodDays = 30;
     
     const macroData = getPeriodData(macroPeriodDays, 'day', true);
