@@ -193,9 +193,10 @@ function applyI18n() {
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
     el.placeholder = t(el.dataset.i18nPlaceholder);
   });
-  // Language toggle button label
-  const langBtn = document.getElementById('lang-btn');
-  if (langBtn) langBtn.textContent = state.lang === 'en' ? 'ES' : 'EN';
+  ['lang-btn', 'lang-btn-stats'].forEach(id => {
+    const btn = document.getElementById(id);
+    if(btn) btn.textContent = state.lang === 'en' ? 'ES' : 'EN';
+  });
 }
 
 function toggleLang() {
@@ -203,6 +204,7 @@ function toggleLang() {
   persistState();
   applyI18n();
   if (state.screen === 'home') renderHome();
+  if (state.screen === 'stats') renderStats();
 }
 
 /* ─────────────────────────────────────────────────────────
@@ -807,8 +809,14 @@ function escHtml(s) {
 ───────────────────────────────────────────────────────── */
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
-  document.getElementById('theme-icon-dark').style.display = theme === 'dark' ? '' : 'none';
-  document.getElementById('theme-icon-light').style.display = theme === 'light' ? '' : 'none';
+  ['theme-icon-dark', 'theme-icon-dark-stats'].forEach(id => {
+      const icon = document.getElementById(id);
+      if (icon) icon.style.display = theme === 'dark' ? '' : 'none';
+  });
+  ['theme-icon-light', 'theme-icon-light-stats'].forEach(id => {
+      const icon = document.getElementById(id);
+      if (icon) icon.style.display = theme === 'light' ? '' : 'none';
+  });
   document.querySelector('meta[name="theme-color"]').content = theme === 'dark' ? '#0f1a14' : '#f5f7f3';
 }
 
