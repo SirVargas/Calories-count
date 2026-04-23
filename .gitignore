@@ -1,0 +1,11 @@
+# ⚠️ SECURITY: config.js contains your API key — NEVER commit it
+config.js
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
