@@ -181,6 +181,14 @@
   .analyzing-sub { font-size: 12px; color: var(--text3); margin-top: 6px; }
   .dot-anim::after { content: ''; animation: dots 1.2s steps(3, end) infinite; }
   @keyframes dots { 0%{content:''} 33%{content:'.'} 66%{content:'..'} 100%{content:'...'} }
+  #analyzing-error { display: none; flex-direction: column; align-items: center; gap: 16px; padding: 32px 28px; text-align: center; }
+  #analyzing-error.visible { display: flex; }
+  #analyzing-progress { display: flex; flex-direction: column; align-items: center; }
+  .analyzing-error-icon { font-size: 40px; }
+  .analyzing-error-msg { font-size: 14px; color: var(--danger); line-height: 1.5; max-width: 300px; background: var(--toast-err-bg); border: 1px solid var(--toast-err-border); border-radius: var(--radius-sm); padding: 14px 18px; }
+  .analyzing-back-btn { height: 50px; padding: 0 32px; border-radius: var(--radius-sm); background: var(--surface); border: 1px solid var(--border2); color: var(--text); font-family: var(--ff); font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background .15s; }
+  .analyzing-back-btn:hover { background: var(--surface2); }
+  .analyzing-back-btn svg { width: 16px; height: 16px; }
 
   /* ── Result screen ───────────────────────────────── */
   #screen-result { background: var(--bg); overflow-y: auto; }
@@ -335,12 +343,22 @@
 
   <!-- ══ ANALYZING SCREEN ════════════════════════════ -->
   <div id="screen-analyzing" class="screen hidden">
-    <div style="position:relative;display:flex;align-items:center;justify-content:center;">
-      <div class="analyzing-pulse"></div>
-      <img id="analyzing-img" class="analyzing-img" src=""/>
+    <div id="analyzing-progress">
+      <div style="position:relative;display:flex;align-items:center;justify-content:center;">
+        <div class="analyzing-pulse"></div>
+        <img id="analyzing-img" class="analyzing-img" src=""/>
+      </div>
+      <p class="analyzing-label dot-anim">Identifying your meal</p>
+      <p class="analyzing-sub">This takes a few seconds</p>
     </div>
-    <p class="analyzing-label dot-anim">Identifying your meal</p>
-    <p class="analyzing-sub">This takes a few seconds</p>
+    <div id="analyzing-error">
+      <div class="analyzing-error-icon">⚠️</div>
+      <div class="analyzing-error-msg" id="analyzing-error-msg"></div>
+      <button class="analyzing-back-btn" onclick="goCapture()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        Go back
+      </button>
+    </div>
   </div>
 
   <!-- ══ RESULT SCREEN ═══════════════════════════════ -->
@@ -475,7 +493,11 @@ function showScreen(name) {
 }
 
 function goHome() { renderHome(); showScreen('home'); }
-function goCapture() { showScreen('capture'); document.getElementById('analyze-btn').disabled = !state.currentPhoto; }
+function goCapture() {
+  resetAnalyzingScreen();
+  showScreen('capture');
+  document.getElementById('analyze-btn').disabled = !state.currentPhoto;
+}
 
 /* ─────────────────────────────────────────────────────────
    API KEY SETUP
@@ -574,30 +596,76 @@ function renderHome() {
 ───────────────────────────────────────────────────────── */
 document.getElementById('file-input').addEventListener('change', e => {
   const file = e.target.files[0];
-  if (!file) return;
+  if (!file) {
+    console.log('[Caloriq] file-input change: no file selected');
+    return;
+  }
+  console.log('[Caloriq] file-input change — name:', file.name, '| type:', file.type, '| size:', file.size, 'bytes');
+
   const reader = new FileReader();
+
+  reader.onloadstart = () => console.log('[Caloriq] FileReader: started reading', file.name);
+
+  reader.onprogress = ev => {
+    if (ev.lengthComputable) {
+      console.log('[Caloriq] FileReader: progress', Math.round((ev.loaded / ev.total) * 100) + '%');
+    }
+  };
+
   reader.onload = ev => {
-    state.currentPhoto = ev.target.result;
+    const dataUrl = ev.target.result;
+    console.log('[Caloriq] FileReader: load complete — data URL length:', dataUrl.length);
+    state.currentPhoto = dataUrl;
     const img = document.getElementById('preview-img');
     img.src = state.currentPhoto;
     img.style.display = 'block';
     document.getElementById('preview-placeholder').style.display = 'none';
     document.getElementById('analyze-btn').disabled = false;
   };
-  reader.readAsDataURL(file);
+
+  reader.onerror = ev => {
+    console.error('[Caloriq] FileReader: error reading file:', reader.error);
+    showToast('Failed to load image: ' + (reader.error?.message || 'Unknown error'));
+  };
+
+  reader.onabort = () => console.warn('[Caloriq] FileReader: reading aborted');
+
+  try {
+    reader.readAsDataURL(file);
+  } catch (err) {
+    console.error('[Caloriq] FileReader.readAsDataURL() threw:', err);
+    showToast('Failed to load image: ' + (err.message || 'Unknown error'));
+  }
 });
 
 /* ─────────────────────────────────────────────────────────
    AI ANALYSIS
 ───────────────────────────────────────────────────────── */
+function showAnalyzingError(msg) {
+  document.getElementById('analyzing-progress').style.display = 'none';
+  const errEl = document.getElementById('analyzing-error');
+  document.getElementById('analyzing-error-msg').textContent = msg;
+  errEl.classList.add('visible');
+}
+
+function resetAnalyzingScreen() {
+  document.getElementById('analyzing-progress').style.display = '';
+  const errEl = document.getElementById('analyzing-error');
+  errEl.classList.remove('visible');
+}
+
 async function analyzePhoto() {
   if (!state.currentPhoto) return;
+
+  resetAnalyzingScreen();
   document.getElementById('analyzing-img').src = state.currentPhoto;
   showScreen('analyzing');
 
-  const base64 = state.currentPhoto.replace(/^data:image\/\w+;base64,/, '');
   const mimeMatch = state.currentPhoto.match(/^data:(image\/\w+);base64,/);
   const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+  const base64 = state.currentPhoto.replace(/^data:image\/\w+;base64,/, '');
+
+  console.log('[Caloriq] analyzePhoto() start — mimeType:', mimeType, '| base64 length:', base64.length);
 
   const prompt = `You are a professional nutritionist. Analyze this food photo and return ONLY valid JSON (no markdown, no extra text) with this exact structure:
 {
@@ -615,40 +683,57 @@ async function analyzePhoto() {
 Be realistic about portions based on what you can see. If you cannot identify food, still return valid JSON with your best estimate and set confidence to "low". Do not include any text outside the JSON object.`;
 
   try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${state.apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{
-            parts: [
-              { text: prompt },
-              { inlineData: { mimeType, data: base64 } }
-            ]
-          }],
-          generationConfig: { temperature: 0.3, maxOutputTokens: 600 }
-        })
-      }
-    );
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${state.apiKey}`;
+    console.log('[Caloriq] Sending request to Gemini API…');
+
+    const res = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          parts: [
+            { text: prompt },
+            { inlineData: { mimeType, data: base64 } }
+          ]
+        }],
+        generationConfig: { temperature: 0.3, maxOutputTokens: 600 }
+      })
+    });
+
+    console.log('[Caloriq] Gemini response status:', res.status);
 
     if (!res.ok) {
-      const errBody = await res.json().catch(() => ({}));
-      const msg = errBody?.error?.message || `HTTP ${res.status}`;
-      throw new Error(msg);
+      const errBody = await res.json().catch(jsonErr => {
+        console.error('[Caloriq] Failed to parse error response JSON:', jsonErr);
+        return {};
+      });
+      console.error('[Caloriq] Gemini API error body:', errBody);
+      const errMsg = errBody?.error?.message || `HTTP ${res.status}`;
+      const isQuota = res.status === 429 || errMsg.toLowerCase().includes('quota');
+      throw new Error(isQuota ? 'API quota exceeded. Please check your Gemini plan or wait a moment before retrying. Details: ' + errMsg : errMsg);
     }
 
     const data = await res.json();
+    console.log('[Caloriq] Gemini response data:', data);
+
     const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    console.log('[Caloriq] Raw model text:', rawText);
+
     const cleaned = rawText.replace(/```json|```/g, '').trim();
-    const result = JSON.parse(cleaned);
+    let result;
+    try {
+      result = JSON.parse(cleaned);
+    } catch (parseErr) {
+      console.error('[Caloriq] Failed to parse model JSON:', parseErr, '| cleaned text:', cleaned);
+      throw new Error('Could not parse AI response. The model returned unexpected text.');
+    }
 
     state.currentResult = result;
     showResult(result);
 
   } catch(err) {
-    goCapture();
-    showToast('Analysis failed: ' + (err.message || 'Unknown error'));
+    console.error('[Caloriq] analyzePhoto() error:', err);
+    showAnalyzingError('Analysis failed: ' + (err.message || 'Unknown error'));
   }
 }
 
@@ -752,6 +837,7 @@ function saveGoal() {
     persistState();
     renderHome();
     document.getElementById('goal-modal').classList.remove('open');
+    showToast('✓ Daily goal updated to ' + g + ' kcal', true);
   } else {
     showToast('Please enter a goal between 500 and 9999 kcal');
   }
@@ -774,7 +860,7 @@ function showToast(msg, success=false) {
   t.style.borderColor = success ? 'var(--toast-ok-border)' : 'var(--toast-err-border)';
   t.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 10000);
 }
 
 /* ─────────────────────────────────────────────────────────
