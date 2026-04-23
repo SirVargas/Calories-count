@@ -7,6 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <title>Caloriq</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="config.js"></script>
 <link rel="manifest" href="manifest.json"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -22,6 +23,11 @@
       <span class="topbar-title">Calori<span class="q-animate">q</span></span>
       <div class="topbar-actions">
         <button class="icon-btn" id="lang-btn" onclick="toggleLang()" title="Switch language">ES</button>
+        <button class="icon-btn" onclick="renderStats(); showScreen('stats');" title="View stats">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+            <path d="M12 20V10M18 20V4M6 20v-4"/>
+          </svg>
+        </button>
         <button class="icon-btn" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle light/dark mode">
           <svg id="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
           <svg id="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" style="display:none"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
@@ -158,6 +164,35 @@
       <div class="result-actions">
         <button class="btn" onclick="goCapture()" data-i18n="retake">Retake</button>
         <button class="btn primary" onclick="saveMeal()" data-i18n="saveToLog">Save to log →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STATS SCREEN ══════════════════════════════════ -->
+  <div id="screen-stats" class="screen hidden" style="overflow-y: auto;">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goHome()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      </button>
+      <span class="topbar-title" data-i18n="statsTitle">Statistics</span>
+    </div>
+    <div class="stats-content">
+      <div class="stats-view-selector">
+          <button class="view-btn active" onclick="setStatsView('day')" data-i18n="statsDay">Day</button>
+          <button class="view-btn" onclick="setStatsView('week')" data-i18n="statsWeek">Week</button>
+          <button class="view-btn" onclick="setStatsView('month')" data-i18n="statsMonth">Month</button>
+      </div>
+      <div class="chart-container">
+          <h3 data-i18n="dailyCalories">Daily Calories</h3>
+          <canvas id="daily-calories-chart"></canvas>
+      </div>
+      <div class="chart-container">
+          <h3 data-i18n="macroDistribution">Macronutrient Distribution</h3>
+          <canvas id="macro-distribution-chart"></canvas>
+      </div>
+      <div class="chart-container">
+          <h3 data-i18n="monthlyTrend">Monthly Trend</h3>
+          <canvas id="monthly-trend-chart"></canvas>
       </div>
     </div>
   </div>

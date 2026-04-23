@@ -53,6 +53,13 @@ const TRANSLATIONS = {
     couldNotParse: 'Could not parse AI response. The model returned unexpected text.',
     quotaExceeded: 'API quota exceeded. Please check your Gemini plan or wait a moment before retrying.',
     yourMeal: 'Your meal',
+    statsTitle: 'Statistics',
+    statsDay: 'Day',
+    statsWeek: 'Week',
+    statsMonth: 'Month',
+    dailyCalories: 'Daily Calories',
+    macroDistribution: 'Macro Distribution',
+    monthlyTrend: 'Monthly Trend',
   },
   es: {
     appTitle: 'Calori',
@@ -105,6 +112,13 @@ const TRANSLATIONS = {
     couldNotParse: 'No se pudo procesar la respuesta de la IA. El modelo devolvió texto inesperado.',
     quotaExceeded: 'Cuota de API excedida. Revisa tu plan de Gemini o espera un momento antes de reintentar.',
     yourMeal: 'Tu comida',
+    statsTitle: 'Estadísticas',
+    statsDay: 'Día',
+    statsWeek: 'Semana',
+    statsMonth: 'Mes',
+    dailyCalories: 'Calorías Diarias',
+    macroDistribution: 'Distribución de Macros',
+    monthlyTrend: 'Tendencia Mensual',
   }
 };
 
@@ -122,6 +136,8 @@ let state = {
   currentResult: null,
   deleteTarget: null,
   editTarget: null,
+  statsView: 'day',
+  charts: {},
 };
 
 function t(key) {
@@ -302,6 +318,116 @@ function renderHome() {
 }
 
 /* ─────────────────────────────────────────────────────────
+   STATS SCREEN
+───────────────────────────────────────────────────────── */
+function getChartColors() {
+    const style = getComputedStyle(document.body);
+    return {
+        accent: style.getPropertyValue('--accent'),
+        text2: style.getPropertyValue('--text2'),
+        surface1: style.getPropertyValue('--surface1'),
+        surface2: style.getPropertyValue('--surface2'),
+    };
+}
+
+function renderStats() {
+    const colors = getChartColors();
+
+    // Daily Calories Chart
+    const dailyData = { labels: [], calories: [] };
+    for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const dayKey = d.toISOString().slice(0, 10);
+        const meals = state.meals.filter(m => m.date === dayKey);
+        const totalCals = meals.reduce((sum, m) => sum + m.cals, 0);
+        dailyData.labels.push(d.toLocaleDateString(state.lang === 'es' ? 'es-MX' : 'en-US', { weekday: 'short' }));
+        dailyData.calories.push(totalCals);
+    }
+
+    if (state.charts.daily) state.charts.daily.destroy();
+    state.charts.daily = new Chart(document.getElementById('daily-calories-chart'), {
+        type: 'bar',
+        data: {
+            labels: dailyData.labels,
+            datasets: [{
+                label: t('calories'),
+                data: dailyData.calories,
+                backgroundColor: colors.accent,
+                borderRadius: 4,
+            }]
+        },
+        options: {
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { grid: { color: colors.surface2 }, ticks: { color: colors.text2 } },
+                x: { grid: { display: false }, ticks: { color: colors.text2 } }
+            }
+        }
+    });
+
+    // Macro Distribution Chart
+    const totals = todayTotals();
+    if (state.charts.macro) state.charts.macro.destroy();
+    state.charts.macro = new Chart(document.getElementById('macro-distribution-chart'), {
+        type: 'doughnut',
+        data: {
+            labels: [t('protein'), t('carbs'), t('fat')],
+            datasets: [{
+                data: [totals.protein, totals.carbs, totals.fat],
+                backgroundColor: ['#10B981', '#3B82F6', '#F59E0B']
+            }]
+        },
+        options: {
+            plugins: { legend: { position: 'bottom', labels: { color: colors.text2 } } },
+            cutout: '70%'
+        }
+    });
+
+    // Monthly Trend Chart
+    const weeklyData = { labels: [], calories: [] };
+    for (let i = 29; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const dayKey = d.toISOString().slice(0, 10);
+        const meals = state.meals.filter(m => m.date === dayKey);
+        const totalCals = meals.reduce((sum, m) => sum + m.cals, 0);
+        weeklyData.labels.push(d.toLocaleDateString(state.lang === 'es' ? 'es-MX' : 'en-US', { month: 'short', day: 'numeric' }));
+        weeklyData.calories.push(totalCals);
+    }
+
+    if (state.charts.monthly) state.charts.monthly.destroy();
+    state.charts.monthly = new Chart(document.getElementById('monthly-trend-chart'), {
+        type: 'line',
+        data: {
+            labels: weeklyData.labels,
+            datasets: [{
+                label: t('calories'),
+                data: weeklyData.calories,
+                borderColor: colors.accent,
+                tension: 0.1
+            }]
+        },
+        options: {
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { grid: { color: colors.surface2 }, ticks: { color: colors.text2 } },
+                x: { grid: { display: false }, ticks: { color: colors.text2 } }
+            }
+        }
+    });
+}
+
+function setStatsView(view) {
+  state.statsView = view;
+  document.querySelectorAll('.stats-view-selector .view-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent.toLowerCase() === view);
+  });
+  // In a real app, you would re-render the charts based on the selected view.
+  // For now, this is just a UI change.
+}
+
+/* ─────────────────────────────────────────────────────────
    IMAGE RESIZING (improves reliability, reduces payload)
 ───────────────────────────────────────────────────────── */
 function resizeImage(dataUrl, maxDim = 1024) {
@@ -445,7 +571,7 @@ async function analyzePhoto() {
   console.log('[Caloriq] analyzePhoto() start — mimeType:', mimeType, '| base64 length:', base64.length);
 
   try {
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${state.apiKey}`;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${state.apiKey}`;
     console.log('[Caloriq] Sending request to Gemini API…');
 
     const res = await fetch(apiUrl, {
@@ -690,6 +816,9 @@ function toggleTheme() {
   const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
   localStorage.setItem('caloriq_theme', next);
   applyTheme(next);
+  if (state.screen === 'stats') {
+      renderStats();
+  }
 }
 
 (function initTheme() {

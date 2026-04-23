@@ -25,6 +25,7 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   if (e.request.url.includes('generativelanguage.googleapis.com')) return;
   if (e.request.url.includes('config.js')) return;
+  if (e.request.url.includes('cdn.jsdelivr.net')) return;
 
   e.respondWith(
     caches.match(e.request).then(cached => {
