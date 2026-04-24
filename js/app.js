@@ -43,12 +43,6 @@ const TRANSLATIONS = {
     saveChanges: 'Save changes',
     noMealsToday: 'No meals logged today.',
     tapToStart: 'Tap <strong>Log a meal</strong> to get started.',
-    setupTitle: 'Caloriq',
-    setupSub: 'Enter your Gemini API key to get started.',
-    apiKeyLabel: 'Gemini API Key',
-    apiKeyHint: 'Get your free key at <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a>',
-    saveKey: 'Save & continue',
-    apiKeyError: 'Enter a valid Gemini API key (starts with AIza…)',
     failedLoadImage: 'Failed to load image',
     couldNotParse: 'Could not parse AI response. The model returned unexpected text.',
     quotaExceeded: 'API quota exceeded. Please check your Gemini plan or wait a moment before retrying.',
@@ -102,12 +96,6 @@ const TRANSLATIONS = {
     saveChanges: 'Guardar cambios',
     noMealsToday: 'No hay comidas registradas hoy.',
     tapToStart: 'Toca <strong>Registrar comida</strong> para comenzar.',
-    setupTitle: 'Caloriq',
-    setupSub: 'Ingresa tu clave de API de Gemini para comenzar.',
-    apiKeyLabel: 'Clave API de Gemini',
-    apiKeyHint: 'Obtén tu clave gratuita en <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a>',
-    saveKey: 'Guardar y continuar',
-    apiKeyError: 'Ingresa una clave de API de Gemini válida (comienza con AIza…)',
     failedLoadImage: 'Error al cargar imagen',
     couldNotParse: 'No se pudo procesar la respuesta de la IA. El modelo devolvió texto inesperado.',
     quotaExceeded: 'Cuota de API excedida. Revisa tu plan de Gemini o espera un momento antes de reintentar.',
@@ -127,7 +115,7 @@ const TRANSLATIONS = {
 ───────────────────────────────────────────────────────── */
 const DB_KEY = 'caloriq_v1';
 let state = {
-  screen: 'setup',
+  screen: 'home', // Always start at home
   lang: 'en',
   apiKey: '',
   dailyGoal: 2000,
@@ -149,7 +137,7 @@ function loadState() {
     const raw = localStorage.getItem(DB_KEY);
     if (raw) {
       const saved = JSON.parse(raw);
-      state.apiKey = saved.apiKey || '';
+      // No longer loading API key from storage
       state.dailyGoal = saved.dailyGoal || 2000;
       state.meals = saved.meals || [];
       state.lang = saved.lang || 'en';
@@ -158,14 +146,17 @@ function loadState() {
     console.warn('[Caloriq] loadState parse error:', e);
   }
 
-  if (typeof CALORIQ_CONFIG !== 'undefined' && CALORIQ_CONFIG.GEMINI_API_KEY) {
-    state.apiKey = CALORIQ_CONFIG.GEMINI_API_KEY;
-  }
-  if (typeof CALORIQ_CONFIG !== 'undefined' && CALORIQ_CONFIG.DEFAULT_DAILY_GOAL && !localStorage.getItem(DB_KEY)) {
-    state.dailyGoal = CALORIQ_CONFIG.DEFAULT_DAILY_GOAL;
+  // API key is now loaded from config file at build time
+  if (typeof CALORIQ_CONFIG !== 'undefined') {
+    state.apiKey = CALORIQ_CONFIG.GEMINI_API_KEY || '';
+    // Set default goal only if it is not in local storage
+    if (CALORIQ_CONFIG.DEFAULT_DAILY_GOAL && !localStorage.getItem(DB_KEY)) {
+      state.dailyGoal = CALORIQ_CONFIG.DEFAULT_DAILY_GOAL;
+    }
   }
 
-  state.screen = state.apiKey ? 'home' : 'setup';
+  // The screen is always 'home' now
+  state.screen = 'home';
 }
 
 function persistState() {
@@ -174,7 +165,7 @@ function persistState() {
     meals: state.meals,
     lang: state.lang,
   };
-  if (!hasConfigKey()) data.apiKey = state.apiKey;
+  // No longer persisting API key
   try {
     localStorage.setItem(DB_KEY, JSON.stringify(data));
   } catch(e) {
@@ -229,24 +220,7 @@ function goStats() {
   showScreen('stats');
 }
 
-
-/* ─────────────────────────────────────────────────────────
-   API KEY SETUP
-───────────────────────────────────────────────────────── */
-function saveApiKey() {
-  const key = document.getElementById('api-key-input').value.trim();
-  if (!key || !key.startsWith('AIza')) {
-    showToast(t('apiKeyError'));
-    return;
-  }
-  state.apiKey = key;
-  persistState();
-  goHome();
-}
-
-function hasConfigKey() {
-  return typeof CALORIQ_CONFIG !== 'undefined' && !!CALORIQ_CONFIG.GEMINI_API_KEY;
-}
+// No longer need API Key setup screen or functions
 
 /* ─────────────────────────────────────────────────────────
    DAILY HELPERS
@@ -937,7 +911,7 @@ function showToast(msg, success = false) {
   t_el.style.borderColor = success ? 'var(--toast-ok-border)' : 'var(--toast-err-border)';
   t_el.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t_el.classList.remove('show'), 10000);
+  toastimer = setTimeout(() => t_el.classList.remove('show'), 10000);
 }
 
 /* ─────────────────────────────────────────────────────────

@@ -1,13 +1,58 @@
-const fs = require('fs');
+const fs = require('fs-extra');
+const path = require('path');
 
-const key = process.env.GEMINI_API_KEY || '';
+const buildDir = path.join(__dirname, 'dist');
+const sourceDir = __dirname;
 
-fs.writeFileSync('config.js',
-  `const CALORIQ_CONFIG = {\n` +
-  `  GEMINI_API_KEY: '${key}',\n` +
-  `  GEMINI_MODEL: 'gemini-2.5-flash-lite',\n` +
-  `  DEFAULT_DAILY_GOAL: 2000,\n` +
-  `};\n`
-);
+async function build() {
+    try {
+        // 1. Clean build directory
+        await fs.emptyDir(buildDir);
+        console.log('Cleaned build directory.');
 
-console.log('config.js generated' + (key ? ' with API key' : ' WITHOUT API key (GEMINI_API_KEY not set)'));
+        // 2. Create config file from environment variable
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey) {
+            throw new Error('GEMINI_API_KEY environment variable not set.');
+        }
+
+        const configContent = `
+var CALORIQ_CONFIG = {
+    GEMINI_API_KEY: "${apiKey}"
+};
+`;
+        // Ensure the js directory exists in dist
+        await fs.ensureDir(path.join(buildDir, 'js'));
+        await fs.writeFile(path.join(buildDir, 'js', 'config.js'), configContent);
+        console.log('Generated js/config.js from environment variable.');
+
+        // 3. Copy all other static assets
+        const filesToCopy = [
+            'index.html',
+            'css',
+            'js/app.js',
+            'js/chart.js',
+            'img',
+            'manifest.json',
+            'sw.js'
+        ];
+
+        for (const file of filesToCopy) {
+            const srcPath = path.join(sourceDir, file);
+            const destPath = path.join(buildDir, file);
+            if (await fs.pathExists(srcPath)) {
+                await fs.copy(srcPath, destPath);
+                console.log(`Copied ${file} to dist.`);
+            }
+        }
+
+        console.log('\nBuild process completed successfully!');
+        console.log('Deploy the "dist" directory to your hosting provider.');
+
+    } catch (error) {
+        console.error('\nBuild failed:', error.message);
+        process.exit(1);
+    }
+}
+
+build();

@@ -1,0 +1,10 @@
+{
+    "name": "caloriq-app",
+    "version": "1.0.0",
+    "scripts": {
+        "build": "node build.js"
+    },
+    "dependencies": {
+        "fs-extra": "^11.2.0"
+    }
+}

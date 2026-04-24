@@ -1,0 +1,23 @@
+{
+    "version": 2,
+    "builds": [
+        {
+            "src": "./package.json",
+            "use": "@vercel/node",
+            "config": { "includeFiles": ["dist/**"] }
+        }
+    ],
+    "routes": [
+        {
+            "src": "/js/config.js",
+            "dest": "/dist/js/config.js"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/dist/$1"
+        }
+    ],
+    "env": {
+        "GEMINI_API_KEY": "@gemini_api_key"
+    }
+}
