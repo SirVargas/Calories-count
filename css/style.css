@@ -59,7 +59,7 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--ff); font-size: 16px; -webkit-font-smoothing: antialiased; overflow: hidden; transition: background .3s, color .3s; }
+html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--ff); font-size: 16px; -webkit-font-smoothing: antialiased; transition: background .3s, color .3s; }
 
 /* ── Q animation ──────────────────────────────────── */
 .q-animate {
@@ -259,8 +259,9 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
 /* ── Stats screen ────────────────────────────────── */
-#screen-stats { background: var(--bg); }
-.stats-content { padding: 0 22px 40px; }
+#screen-stats { background: var(--bg); overflow-y: auto; }
+#screen-stats::-webkit-scrollbar { display: none; }
+.stats-content { padding: 0 22px 120px; overflow-y: auto; }
 .stats-view-selector { display: flex; gap: 8px; margin-bottom: 24px; }
 .view-btn { flex: 1; height: 38px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); color: var(--text2); font-family: var(--ff); font-size: 13px; font-weight: 500; cursor: pointer; transition: background .15s, color .15s, border-color .15s; }
 

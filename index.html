@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0f1a14">
-  <title data-i18n="appTitle">Calori</title>
+  <title>Caloriq</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display&display=swap" rel="stylesheet">
@@ -22,7 +22,7 @@
     ───────────────────────────────────────────────────────── -->
     <div id="screen-home" class="screen">
       <div class="topbar">
-        <div class="topbar-title" data-i18n="appTitle">Calori<span class="q-animate">q</span></div>
+        <div class="topbar-title">Calori<span class="q-animate">q</span></div>
         <div class="topbar-actions">
           <button class="icon-btn" onclick="toggleLang()" id="lang-btn">ES</button>
           <button class="icon-btn theme-btn" onclick="toggleTheme()">
@@ -30,7 +30,7 @@
             <svg id="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
           </button>
           <button class="icon-btn" onclick="goStats()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2.5 2v6h6M2.6 15h-1A2.4 2.4 0 0 1 4 10.5M22 17v-6h-6M21.4 9h1a2.4 2.4 0 0 1-2.5 4.5"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20V16"/></svg>
           </button>
         </div>
       </div>
@@ -57,7 +57,7 @@
       <div id="meal-list"></div>
 
       <button id="fab" onclick="goCapture()">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 5.5c-3.3 0-6 2.7-6 6s2.7 6 6 6 6-2.7 6-6-2.7-6-6-6zm0 10.5c-2.5 0-4.5-2-4.5-4.5s2-4.5 4.5-4.5 4.5 2 4.5 4.5-2 4.5-4.5-4.5z"/><path d="M12 3C7 3 3 7 3 12s4 9 9 9 9-4 9-9-4-9-9-9zm0 16.5c-4.1 0-7.5-3.4-7.5-7.5S7.9 4.5 12 4.5s7.5 3.4 7.5 7.5-3.4 7.5-7.5 7.5z"/></svg>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 5.5c-3.3 0-6 2.7-6 6s2.7 6 6 6 6-2.7 6-6-2.7-6-6-6zm0 10.5c-2.5 0-4.5-2-4.5-4.5s2-4.5 4.5-4.5 4.5 2 4.5 4.5-2 4.5-4.5 4.5z"/><path d="M12 3C7 3 3 7 3 12s4 9 9 9 9-4 9-9-4-9-9-9zm0 16.5c-4.1 0-7.5-3.4-7.5-7.5S7.9 4.5 12 4.5s7.5 3.4 7.5 7.5-3.4 7.5-7.5 7.5z"/></svg>
         <span data-i18n="logMeal">Log a meal</span>
       </button>
     </div>
@@ -247,7 +247,7 @@
         <h3 class="modal-title" data-i18n="editMeal">Edit meal</h3>
         <div class="result-section edit-section" style="margin-top:20px">
             <div class="edit-row">
-                <label for="edit-meal-name" class="edit-label" data-i18n="name">Name</label>
+                <label for="edit-meal-name" class="edit-label" data-i1s8n="name">Name</label>
                 <input type="text" id="edit-meal-name" class="edit-input">
             </div>
             <div class="edit-row">
