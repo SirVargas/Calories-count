@@ -10,21 +10,24 @@ async function build() {
         await fs.emptyDir(buildDir);
         console.log('Cleaned build directory.');
 
-        // 2. Create config file from environment variable
-        const apiKey = process.env.GEMINI_API_KEY;
-        if (!apiKey) {
+        // 2. Create config file from environment variables
+        const geminiApiKey = process.env.GEMINI_API_KEY;
+        const hfApiKey = process.env.HF_API_KEY || ''; // Optional, defaults to empty
+
+        if (!geminiApiKey) {
             throw new Error('GEMINI_API_KEY environment variable not set.');
         }
 
         const configContent = `
 var CALORIQ_CONFIG = {
-    GEMINI_API_KEY: "${apiKey}"
+    GEMINI_API_KEY: "${geminiApiKey}",
+    HF_API_KEY: "${hfApiKey}"
 };
 `;
-        // Ensure the js directory exists in dist
+
         await fs.ensureDir(path.join(buildDir, 'js'));
         await fs.writeFile(path.join(buildDir, 'js', 'config.js'), configContent);
-        console.log('Generated js/config.js from environment variable.');
+        console.log('Generated js/config.js from environment variables.');
 
         // 3. Copy all other static assets
         const filesToCopy = [
