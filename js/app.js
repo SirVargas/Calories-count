@@ -277,15 +277,17 @@ function renderHome() {
     return;
   }
 
-  list.innerHTML = meals.map(m => `
+  list.innerHTML = meals.map(m => {
+    const mealName = (typeof m.name === 'object' && m.name) ? (m.name[state.lang] || m.name.en) : m.name;
+    return `
     <div class="meal-card">
       <div class="meal-card-inner">
         ${m.photo
-          ? `<img class="meal-thumb" src="${m.photo}" alt="${escHtml(m.name)}"/>`
+          ? `<img class="meal-thumb" src="${m.photo}" alt="${escHtml(mealName)}"/>`
           : `<div class="meal-thumb" style="background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:28px">🍽️</div>`}
         <div class="meal-info">
           <div>
-            <div class="meal-name">${escHtml(m.name)}</div>
+            <div class="meal-name">${escHtml(mealName)}</div>
             <div class="meal-time">${m.time}</div>
           </div>
           <div class="meal-cals-row">
@@ -303,7 +305,7 @@ function renderHome() {
         </div>
       </div>
     </div>
-  `).join('');
+  `}).join('');
 }
 
 /* ─────────────────────────────────────────────────────────
@@ -546,43 +548,35 @@ function resetAnalyzingScreen() {
   document.getElementById('analyzing-error').classList.remove('visible');
 }
 
-function buildPrompt(lang) {
-  const isEs = lang === 'es';
-  return isEs
-    ? `Eres un nutricionista profesional con experiencia en análisis de alimentos latinoamericanos, mexicanos, españoles e internacionales.
-Analiza esta foto de comida y devuelve ÚNICAMENTE JSON válido (sin markdown, sin texto adicional) con esta estructura exacta:
-{
-  "foodName": "Nombre descriptivo breve de la comida (máx 5 palabras, en español)",
-  "totalCalories": <número entero>,
-  "protein": <gramos, número entero>,
-  "carbs": <gramos, número entero>,
-  "fat": <gramos, número entero>,
-  "confidence": "high" | "medium" | "low",
-  "items": [
-    { "name": "Nombre del ingrediente o elemento (en español)", "calories": <número entero> }
-  ],
-  "notes": "Nota breve sobre supuestos de porción o incertidumbre (en español)"
-}
-Instrucciones:
-- Estima porciones razonables según lo que se ve en la imagen (no asumas porciones pequeñas por defecto).
-- Si hay múltiples alimentos, lista cada uno por separado en "items".
-- Si no puedes identificar la comida con certeza, devuelve tu mejor estimación y establece confidence a "low".
-- No incluyas texto fuera del objeto JSON.`
-    : `You are a professional nutritionist with expertise in analyzing diverse foods from all cuisines.
+function buildPrompt() {
+  return `You are a professional nutritionist with expertise in analyzing diverse foods from all cuisines, including Latin American, Mexican, and Spanish.
 Analyze this food photo and return ONLY valid JSON (no markdown, no extra text) with this exact structure:
 {
-  "foodName": "Short descriptive meal name (max 5 words)",
+  "foodName": {
+    "en": "Short descriptive meal name in English (max 5 words)",
+    "es": "Nombre descriptivo breve de la comida en español (máx 5 palabras)"
+  },
   "totalCalories": <integer>,
   "protein": <grams, integer>,
   "carbs": <grams, integer>,
   "fat": <grams, integer>,
   "confidence": "high" | "medium" | "low",
   "items": [
-    { "name": "Ingredient or component name", "calories": <integer> }
+    {
+      "name": {
+        "en": "Ingredient or component name in English",
+        "es": "Nombre del ingrediente o elemento en español"
+      },
+      "calories": <integer>
+    }
   ],
-  "notes": "Brief note about portion assumptions or uncertainty"
+  "notes": {
+    "en": "Brief note about portion assumptions or uncertainty",
+    "es": "Nota breve sobre supuestos de porción o incertidumbre"
+  }
 }
 Instructions:
+- For "foodName", "items.name", and "notes", you MUST provide an object with both "en" and "es" keys containing the respective translations.
 - Estimate realistic portions based on what is visible in the image (do not default to small portions).
 - If multiple foods are present, list each separately in "items".
 - Account for cooking methods (fried, grilled, etc.) when estimating calories.
@@ -619,14 +613,17 @@ async function fallbackAnalysis(base64) {
         }
 
         const result = {
-            foodName: description,
+            foodName: { en: description, es: description },
             totalCalories: 'Estimando...',
             protein: '...',
             carbs: '...',
             fat: '...',
             confidence: 'low',
             items: [],
-            notes: 'Fallo de Gemini, usando análisis de respaldo. Ajuste los valores manualmente.'
+            notes: {
+                en: 'Gemini analysis failed, using fallback. Please adjust values manually.',
+                es: 'Fallo de Gemini, usando análisis de respaldo. Ajuste los valores manualmente.'
+            }
         };
         
         state.currentResult = result;
@@ -652,7 +649,7 @@ async function analyzePhoto() {
   const base64 = state.currentPhoto.replace(/^data:image\/[\w+]+;base64,/, '');
 
   try {
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${state.apiKey}`;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=${state.apiKey}`;
 
     const res = await fetch(apiUrl, {
       method: 'POST',
@@ -660,11 +657,11 @@ async function analyzePhoto() {
       body: JSON.stringify({
         contents: [{
           parts: [
-            { text: buildPrompt(state.lang) },
-            { inlineData: { mimeType: mimeType, data: base64 } }
+            { text: buildPrompt() },
+            { inline_data: { mime_type: mimeType, data: base64 } }
           ]
         }],
-        generationConfig: { temperature: 0.2, maxOutputTokens: 2048 }
+        generation_config: { temperature: 0.2, max_output_tokens: 2048 }
       })
     });
 
@@ -701,7 +698,7 @@ async function analyzePhoto() {
 
 function showResult(r) {
   document.getElementById('result-img').src = state.currentPhoto;
-  document.getElementById('result-food-name').textContent = r.foodName || t('yourMeal');
+  document.getElementById('result-food-name').textContent = (r.foodName && (r.foodName[state.lang] || r.foodName.en)) || t('yourMeal');
   
   document.getElementById('result-cals').textContent = (typeof r.totalCalories === 'number') ? Math.round(r.totalCalories) : r.totalCalories;
   document.getElementById('r-protein').textContent = (typeof r.protein === 'number') ? Math.round(r.protein) : r.protein;
@@ -715,20 +712,26 @@ function showResult(r) {
   const itemsList = document.getElementById('items-list');
   let itemsHtml = '';
   if (r.items && r.items.length > 0) {
-    itemsHtml = r.items.map(i => `
+    itemsHtml = r.items.map(i => {
+        const itemName = (i.name && (i.name[state.lang] || i.name.en)) || '';
+        return `
       <div class="item-row">
-        <span class="item-name">${escHtml(i.name)}</span>
+        <span class="item-name">${escHtml(itemName)}</span>
         <span class="item-cals">${Math.round(i.calories)} kcal</span>
       </div>
-    `).join('');
+    `}).join('');
   } else if (r.notes) {
-      itemsHtml = `<div class="item-row"><span class="item-name" style="color:var(--text3)">${escHtml(r.notes)}</span></div>`;
-  } else {
-      itemsHtml = `<div class="item-row"><span class="item-name" style="color:var(--text3)">${t('noItemsDetected')}</span></div>`;
+      const note = (r.notes && (r.notes[state.lang] || r.notes.en)) || '';
+      if (note) {
+        itemsHtml = `<div class="item-row"><span class="item-name" style="color:var(--text3)">${escHtml(note)}</span></div>`;
+      }
+  }
+  if (!itemsHtml) {
+    itemsHtml = `<div class="item-row"><span class="item-name" style="color:var(--text3)">${t('noItemsDetected')}</span></div>`;
   }
   itemsList.innerHTML = itemsHtml;
 
-  document.getElementById('edit-name').value = r.foodName || '';
+  document.getElementById('edit-name').value = (r.foodName && (r.foodName[state.lang] || r.foodName.en)) || '';
   document.getElementById('edit-cals').value = (typeof r.totalCalories === 'number') ? Math.round(r.totalCalories) : '';
   document.getElementById('edit-protein').value = (typeof r.protein === 'number') ? Math.round(r.protein) : '';
   document.getElementById('edit-carbs').value = (typeof r.carbs === 'number') ? Math.round(r.carbs) : '';
@@ -742,18 +745,28 @@ function showResult(r) {
    SAVE MEAL
 ───────────────────────────────────────────────────────── */
 function saveMeal() {
-  const name = document.getElementById('edit-name').value.trim() || t('yourMeal');
   const cals = parseFloat(document.getElementById('edit-cals').value) || 0;
   const protein = parseFloat(document.getElementById('edit-protein').value) || 0;
   const carbs = parseFloat(document.getElementById('edit-carbs').value) || 0;
   const fat = parseFloat(document.getElementById('edit-fat').value) || 0;
+  const nameFromForm = document.getElementById('edit-name').value.trim();
+
+  let nameObject = state.currentResult.foodName;
+
+  if (nameObject && nameFromForm !== (nameObject[state.lang] || nameObject.en)) {
+    nameObject[state.lang] = nameFromForm;
+  } else if (!nameObject) {
+    const defaultName = nameFromForm || t('yourMeal');
+    nameObject = { en: defaultName, es: defaultName };
+  }
 
   const now = new Date();
   const meal = {
     id: 'meal_' + Date.now(),
     date: getLocalDateKey(now),
     time: now.toLocaleTimeString(state.lang === 'es' ? 'es-MX' : 'en-US', { hour: '2-digit', minute: '2-digit' }),
-    name, cals, protein, carbs, fat,
+    name: nameObject,
+    cals, protein, carbs, fat,
     photo: state.currentPhoto,
   };
 
@@ -780,7 +793,8 @@ function openEditMeal(id) {
   if (!meal) return;
   state.editTarget = id;
 
-  document.getElementById('edit-meal-name').value = meal.name;
+  const mealName = (typeof meal.name === 'object' && meal.name) ? (meal.name[state.lang] || meal.name.en) : meal.name;
+  document.getElementById('edit-meal-name').value = mealName;
   document.getElementById('edit-meal-cals').value = Math.round(meal.cals);
   document.getElementById('edit-meal-protein').value = Math.round(meal.protein);
   document.getElementById('edit-meal-carbs').value = Math.round(meal.carbs);
@@ -798,7 +812,14 @@ function saveEditMeal() {
   const meal = state.meals.find(m => m.id === state.editTarget);
   if (!meal) { closeEditMeal(); return; }
 
-  meal.name = document.getElementById('edit-meal-name').value.trim() || meal.name;
+  const newNameStr = document.getElementById('edit-meal-name').value.trim();
+
+  if (typeof meal.name === 'object' && meal.name) {
+    meal.name[state.lang] = newNameStr || (meal.name[state.lang] || meal.name.en);
+  } else {
+    meal.name = newNameStr || meal.name;
+  }
+
   meal.cals = parseFloat(document.getElementById('edit-meal-cals').value) || 0;
   meal.protein = parseFloat(document.getElementById('edit-meal-protein').value) || 0;
   meal.carbs = parseFloat(document.getElementById('edit-meal-carbs').value) || 0;
