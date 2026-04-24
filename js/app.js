@@ -118,6 +118,7 @@ let state = {
   screen: 'home', // Always start at home
   lang: 'en',
   apiKey: '',
+  hfApiKey: '',
   dailyGoal: 2000,
   meals: [],
   currentPhoto: null,
@@ -137,7 +138,6 @@ function loadState() {
     const raw = localStorage.getItem(DB_KEY);
     if (raw) {
       const saved = JSON.parse(raw);
-      // No longer loading API key from storage
       state.dailyGoal = saved.dailyGoal || 2000;
       state.meals = saved.meals || [];
       state.lang = saved.lang || 'en';
@@ -146,16 +146,14 @@ function loadState() {
     console.warn('[Caloriq] loadState parse error:', e);
   }
 
-  // API key is now loaded from config file at build time
   if (typeof CALORIQ_CONFIG !== 'undefined') {
     state.apiKey = CALORIQ_CONFIG.GEMINI_API_KEY || '';
-    // Set default goal only if it is not in local storage
+    state.hfApiKey = CALORIQ_CONFIG.HF_API_KEY || '';
     if (CALORIQ_CONFIG.DEFAULT_DAILY_GOAL && !localStorage.getItem(DB_KEY)) {
       state.dailyGoal = CALORIQ_CONFIG.DEFAULT_DAILY_GOAL;
     }
   }
 
-  // The screen is always 'home' now
   state.screen = 'home';
 }
 
@@ -165,7 +163,6 @@ function persistState() {
     meals: state.meals,
     lang: state.lang,
   };
-  // No longer persisting API key
   try {
     localStorage.setItem(DB_KEY, JSON.stringify(data));
   } catch(e) {
@@ -220,7 +217,6 @@ function goStats() {
   showScreen('stats');
 }
 
-// No longer need API Key setup screen or functions
 
 /* ─────────────────────────────────────────────────────────
    DAILY HELPERS
@@ -318,17 +314,15 @@ function getChartColors() {
 function renderStats() {
     const colors = getChartColors();
 
-    // Destroy existing charts
     if (state.charts.daily) state.charts.daily.destroy();
     if (state.charts.trend) state.charts.trend.destroy();
     if (state.charts.macro) state.charts.macro.destroy();
 
-    const view = state.statsView; // 'day', 'week', or 'month'
+    const view = state.statsView;
 
     const dailyContainer = document.getElementById('daily-calories-chart-container');
     const trendContainer = document.getElementById('monthly-trend-chart-container');
 
-    // Daily/Weekly Bar Chart
     if (view === 'day' || view === 'week') {
         dailyContainer.style.display = 'block';
         const isDayView = view === 'day';
@@ -359,13 +353,12 @@ function renderStats() {
         dailyContainer.style.display = 'none';
     }
 
-    // Trend Line Chart (shown in all views)
     trendContainer.style.display = 'block';
     let trendData;
     if (view === 'month') {
-        trendData = getPeriodData(12, 'month'); // 12 months for month view
+        trendData = getPeriodData(12, 'month');
     } else {
-        trendData = getPeriodData(30, 'day'); // 30 days for day/week view
+        trendData = getPeriodData(30, 'day');
     }
     state.charts.trend = new Chart(document.getElementById('monthly-trend-chart'), {
         type: 'line',
@@ -391,7 +384,6 @@ function renderStats() {
         }
     });
 
-    // Macro Doughnut Chart
     let macroPeriodDays;
     if (view === 'day') macroPeriodDays = 1;
     else if (view === 'week') macroPeriodDays = 7;
@@ -455,13 +447,15 @@ function getPeriodData(count, unit, isMacro = false) {
         const e1 = new Date(end.setHours(23,59,59,999));
 
         const periodMeals = state.meals.filter(m => {
-            const mealDate = new Date(m.date + 'T12:00:00'); // Use noon to avoid timezone issues
+            const mealDate = new Date(m.date + 'T12:00:00');
             return mealDate >= s1 && mealDate <= e1;
         });
 
         const totals = periodMeals.reduce((acc, m) => ({
-            cal: acc.cal + m.cals, protein: acc.protein + m.protein,
-            carbs: acc.carbs + m.carbs, fat: acc.fat + m.fat
+            cal: acc.cal + (m.cals || 0),
+            protein: acc.protein + (m.protein || 0),
+            carbs: acc.carbs + (m.carbs || 0),
+            fat: acc.fat + (m.fat || 0)
         }), { cal: 0, protein: 0, carbs: 0, fat: 0 });
         
         calories.push(totals.cal);
@@ -496,7 +490,7 @@ function resizeImage(dataUrl, maxDim = 1024) {
       canvas.getContext('2d').drawImage(img, 0, 0, w, h);
       resolve(canvas.toDataURL('image/jpeg', 0.85));
     };
-    img.onerror = () => resolve(dataUrl); // fallback: use original
+    img.onerror = () => resolve(dataUrl);
     img.src = dataUrl;
   });
 }
@@ -506,29 +500,13 @@ function resizeImage(dataUrl, maxDim = 1024) {
 ───────────────────────────────────────────────────────── */
 document.getElementById('file-input').addEventListener('change', e => {
   const file = e.target.files[0];
-  if (!file) {
-    console.log('[Caloriq] file-input change: no file selected');
-    return;
-  }
-  console.log('[Caloriq] file-input change — name:', file.name, '| type:', file.type, '| size:', file.size, 'bytes');
+  if (!file) return;
 
   const reader = new FileReader();
 
-  reader.onloadstart = () => console.log('[Caloriq] FileReader: started reading', file.name);
-
-  reader.onprogress = ev => {
-    if (ev.lengthComputable) {
-      console.log('[Caloriq] FileReader: progress', Math.round((ev.loaded / ev.total) * 100) + '%');
-    }
-  };
-
   reader.onload = async ev => {
     const dataUrl = ev.target.result;
-    console.log('[Caloriq] FileReader: load complete — data URL length:', dataUrl.length);
-
     const resized = await resizeImage(dataUrl);
-    console.log('[Caloriq] Resized data URL length:', resized.length);
-
     state.currentPhoto = resized;
     const img = document.getElementById('preview-img');
     img.src = state.currentPhoto;
@@ -538,18 +516,10 @@ document.getElementById('file-input').addEventListener('change', e => {
   };
 
   reader.onerror = () => {
-    console.error('[Caloriq] FileReader: error reading file:', reader.error);
     showToast(t('failedLoadImage') + ': ' + (reader.error?.message || 'Unknown error'));
   };
 
-  reader.onabort = () => console.warn('[Caloriq] FileReader: reading aborted');
-
-  try {
-    reader.readAsDataURL(file);
-  } catch (err) {
-    console.error('[Caloriq] FileReader.readAsDataURL() threw:', err);
-    showToast(t('failedLoadImage') + ': ' + (err.message || 'Unknown error'));
-  }
+  reader.readAsDataURL(file);
 });
 
 /* ─────────────────────────────────────────────────────────
@@ -613,15 +583,14 @@ Instructions:
 async function fallbackAnalysis(base64) {
     console.log('[Caloriq] Starting fallback analysis with Hugging Face');
     try {
-        const hfApiKey = (typeof CALORIQ_CONFIG !== 'undefined' && CALORIQ_CONFIG.HF_API_KEY) ? CALORIQ_CONFIG.HF_API_KEY : '';
-        if (!hfApiKey) {
+        if (!state.hfApiKey) {
             throw new Error('Hugging Face API key not configured.');
         }
 
         const res = await fetch('https://api-inference.huggingface.co/models/Salesforce/blip-image-captioning-large', {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${hfApiKey}`,
+                'Authorization': `Bearer ${state.hfApiKey}`,
                 'Content-Type': 'application/octet-stream'
             },
             body: Uint8Array.from(atob(base64), c => c.charCodeAt(0))
@@ -634,8 +603,6 @@ async function fallbackAnalysis(base64) {
         }
 
         const hfResult = await res.json();
-        console.log('[Caloriq] Hugging Face response:', hfResult);
-
         const description = hfResult[0]?.generated_text;
         if (!description) {
             throw new Error('Could not get description from Hugging Face.');
@@ -657,7 +624,8 @@ async function fallbackAnalysis(base64) {
 
     } catch (err) {
         console.error('[Caloriq] fallbackAnalysis() error:', err);
-        showAnalyzingError(t('analysisFailed') + ': ' + (err.message || 'Hugging Face fallback failed'));
+        const fallbackError = state.hfApiKey ? err.message : 'Hugging Face API key not configured';
+        showAnalyzingError(t('analysisFailed') + ': ' + fallbackError);
     }
 }
 
@@ -673,11 +641,8 @@ async function analyzePhoto() {
   const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
   const base64 = state.currentPhoto.replace(/^data:image\/[\w+]+;base64,/, '');
 
-  console.log('[Caloriq] analyzePhoto() start — mimeType:', mimeType, '| base64 length:', base64.length);
-
   try {
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${state.apiKey}`;
-    console.log('[Caloriq] Sending request to Gemini API…');
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${state.apiKey}`;
 
     const res = await fetch(apiUrl, {
       method: 'POST',
@@ -693,33 +658,19 @@ async function analyzePhoto() {
       })
     });
 
-    console.log('[Caloriq] Gemini response status:', res.status);
-
     if (!res.ok) {
-        if (res.status === 503 || res.status === 429) {
-            console.warn(`[Caloriq] Gemini API responded with ${res.status}, falling back to Hugging Face`);
-            return fallbackAnalysis(base64);
-        }
-      const errBody = await res.json().catch(jsonErr => {
-        console.error('[Caloriq] Failed to parse error response JSON:', jsonErr);
-        return {};
-      });
-      console.error('[Caloriq] Gemini API error body:', errBody);
+      const errBody = await res.json().catch(() => ({}));
       const errMsg = errBody?.error?.message || `HTTP ${res.status}`;
       const isQuota = res.status === 429 || errMsg.toLowerCase().includes('quota');
-      if (isQuota) {
-          console.warn(`[Caloriq] Gemini API quota exceeded, falling back to Hugging Face`);
+      if (isQuota || res.status === 503) {
+          console.warn(`[Caloriq] Gemini API failed (${res.status}), falling back...`);
           return fallbackAnalysis(base64);
       }
       throw new Error(errMsg);
     }
 
     const data = await res.json();
-    console.log('[Caloriq] Gemini response data:', data);
-
     const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    console.log('[Caloriq] Raw model text:', rawText);
-
     const cleaned = rawText.replace(/```json|```/g, '').trim();
     let result;
     try {
@@ -911,7 +862,7 @@ function showToast(msg, success = false) {
   t_el.style.borderColor = success ? 'var(--toast-ok-border)' : 'var(--toast-err-border)';
   t_el.classList.add('show');
   clearTimeout(toastTimer);
-  toastimer = setTimeout(() => t_el.classList.remove('show'), 10000);
+  toastTimer = setTimeout(() => t_el.classList.remove('show'), 10000);
 }
 
 /* ─────────────────────────────────────────────────────────
