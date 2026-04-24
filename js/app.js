@@ -649,7 +649,7 @@ async function analyzePhoto() {
   const base64 = state.currentPhoto.replace(/^data:image\/[\w+]+;base64,/, '');
 
   try {
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=${state.apiKey}`;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${state.apiKey}`;
 
     const res = await fetch(apiUrl, {
       method: 'POST',
@@ -658,10 +658,10 @@ async function analyzePhoto() {
         contents: [{
           parts: [
             { text: buildPrompt() },
-            { inline_data: { mime_type: mimeType, data: base64 } }
+            { inlineData: { mimeType: mimeType, data: base64 } }
           ]
         }],
-        generation_config: { temperature: 0.2, max_output_tokens: 2048 }
+        generationConfig: { temperature: 0.2, maxOutputTokens: 2048 }
       })
     });
 
