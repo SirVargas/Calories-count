@@ -1,4 +1,4 @@
-const CACHE = 'caloriq-v3';
+const CACHE = 'caloriq-v4'; // Updated cache name
 const ASSETS = [
   './',
   './index.html',
@@ -29,13 +29,16 @@ self.addEventListener('fetch', e => {
 
   e.respondWith(
     caches.match(e.request).then(cached => {
-      if (cached) return cached;
-      return fetch(e.request).then(res => {
-        if (!res || res.status !== 200 || res.type === 'opaque') return res;
-        const clone = res.clone();
-        caches.open(CACHE).then(c => c.put(e.request, clone));
+      // Aggressively fetch from network first to ensure freshness
+      const networkFetch = fetch(e.request).then(res => {
+        if (res && res.status === 200) {
+          const clone = res.clone();
+          caches.open(CACHE).then(c => c.put(e.request, clone));
+        }
         return res;
-      }).catch(() => caches.match('./index.html'));
+      });
+      // Return from network, or fallback to cache if network fails
+      return networkFetch.catch(() => cached);
     })
   );
 });
