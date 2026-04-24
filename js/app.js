@@ -221,7 +221,14 @@ function goStats() {
 /* ─────────────────────────────────────────────────────────
    DAILY HELPERS
 ───────────────────────────────────────────────────────── */
-function todayKey() { return new Date().toISOString().slice(0, 10); }
+function getLocalDateKey(date = new Date()) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+function todayKey() { return getLocalDateKey(); }
 
 function todayMeals() {
   const today = todayKey();
@@ -642,7 +649,7 @@ async function analyzePhoto() {
   const base64 = state.currentPhoto.replace(/^data:image\/[\w+]+;base64,/, '');
 
   try {
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${state.apiKey}`;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${state.apiKey}`;
 
     const res = await fetch(apiUrl, {
       method: 'POST',
@@ -741,7 +748,7 @@ function saveMeal() {
   const now = new Date();
   const meal = {
     id: 'meal_' + Date.now(),
-    date: now.toISOString().slice(0, 10),
+    date: getLocalDateKey(now),
     time: now.toLocaleTimeString(state.lang === 'es' ? 'es-MX' : 'en-US', { hour: '2-digit', minute: '2-digit' }),
     name, cals, protein, carbs, fat,
     photo: state.currentPhoto,
