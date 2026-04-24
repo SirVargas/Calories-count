@@ -1,9 +1,9 @@
-/* ─────────────────────────────────────────────────────────
+./* ─────────────────────────────────────────────────────────
    TRANSLATIONS
 ───────────────────────────────────────────────────────── */
 const TRANSLATIONS = {
   en: {
-    appTitle: 'Calori',
+    appTitle: 'Caloriq',
     logMeal: 'Log a meal',
     editGoal: 'Edit goal',
     protein: 'Protein',
@@ -56,7 +56,7 @@ const TRANSLATIONS = {
     calorieTrend: 'Calorie Trend',
   },
   es: {
-    appTitle: 'Calori',
+    appTitle: 'Caloriq',
     logMeal: 'Registrar comida',
     editGoal: 'Editar meta',
     protein: 'Proteína',
@@ -259,7 +259,10 @@ function renderHome() {
   document.getElementById('h-carbs').textContent = Math.round(totals.carbs) + 'g';
   document.getElementById('h-fat').textContent = Math.round(totals.fat) + 'g';
 
-  const pct = Math.min(100, (totals.cal / state.dailyGoal) * 100);
+  let pct = 0;
+  if (state.dailyGoal > 0) {
+      pct = (totals.cal / state.dailyGoal) * 100;
+  }
   const fill = document.getElementById('progress-fill');
   fill.style.width = pct + '%';
   fill.classList.toggle('over', totals.cal > state.dailyGoal);
@@ -644,12 +647,12 @@ async function analyzePhoto() {
   document.getElementById('analyzing-img').src = state.currentPhoto;
   showScreen('analyzing');
 
-  const mimeMatch = state.currentPhoto.match(/^data:(image\/\w+);base64,/);
+  const mimeMatch = state.currentPhoto.match(/^data:(image\/w+);base64,/);
   const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
-  const base64 = state.currentPhoto.replace(/^data:image\/[\w+]+;base64,/, '');
+  const base64 = state.currentPhoto.replace(/^data:image\/[w+]+;base64,/, '');
 
   try {
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${state.apiKey}`;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=${state.apiKey}`;
 
     const res = await fetch(apiUrl, {
       method: 'POST',
@@ -658,10 +661,10 @@ async function analyzePhoto() {
         contents: [{
           parts: [
             { text: buildPrompt(state.lang) },
-            { inlineData: { mimeType, data: base64 } }
+            { inline_data: { mime_type: mimeType, data: base64 } }
           ]
         }],
-        generationConfig: { temperature: 0.2, maxOutputTokens: 2048 }
+        generation_config: { temperature: 0.2, max_output_tokens: 2048 }
       })
     });
 
