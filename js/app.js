@@ -647,9 +647,9 @@ async function analyzePhoto() {
   document.getElementById('analyzing-img').src = state.currentPhoto;
   showScreen('analyzing');
 
-  const mimeMatch = state.currentPhoto.match(/^data:(image\/w+);base64,/);
+  const mimeMatch = state.currentPhoto.match(/^data:(image\/\w+);base64,/);
   const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
-  const base64 = state.currentPhoto.replace(/^data:image\/[w+]+;base64,/, '');
+  const base64 = state.currentPhoto.replace(/^data:image\/[\w+]+;base64,/, '');
 
   try {
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=${state.apiKey}`;
