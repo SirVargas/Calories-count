@@ -270,8 +270,8 @@ function renderHome() {
       pct = (totals.cal / state.dailyGoal) * 100;
   }
   const fill = document.getElementById('progress-fill');
-  fill.style.width = pct + '%';
-  fill.classList.toggle('over', totals.cal > state.dailyGoal);
+  fill.style.width = Math.min(100, pct) + '%';
+  fill.classList.toggle('over', pct > 100);
 
   const list = document.getElementById('meal-list');
   const meals = todayMeals().slice().reverse();
@@ -748,7 +748,7 @@ function showResult(r) {
 
 
 /* ─────────────────────────────────────────────────────────
-   SAVE MEAL
+   SAVE MEAL (NEW)
 ───────────────────────────────────────────────────────── */
 function saveMeal() {
   const cals = parseFloat(document.getElementById('edit-cals').value) || 0;
@@ -756,10 +756,10 @@ function saveMeal() {
     document.getElementById('calorie-warning-modal').classList.add('open');
     return;
   }
-  forceSaveMeal();
+  _internal_saveNewMeal();
 }
 
-function forceSaveMeal() {
+function _internal_saveNewMeal() {
   const cals = parseFloat(document.getElementById('edit-cals').value) || 0;
   const protein = parseFloat(document.getElementById('edit-protein').value) || 0;
   const carbs = parseFloat(document.getElementById('edit-carbs').value) || 0;
@@ -825,6 +825,15 @@ function closeEditMeal() {
 }
 
 function saveEditMeal() {
+  const cals = parseFloat(document.getElementById('edit-meal-cals').value) || 0;
+  if (cals > 4000) {
+      document.getElementById('calorie-warning-modal').classList.add('open');
+      return;
+  }
+  _internal_saveEditedMeal();
+}
+
+function _internal_saveEditedMeal() {
   const meal = state.meals.find(m => m.id === state.editTarget);
   if (!meal) { closeEditMeal(); return; }
 
@@ -845,6 +854,7 @@ function saveEditMeal() {
   renderHome();
   closeEditMeal();
   showToast(t('mealSaved'), true);
+  closeCalorieWarning();
 }
 
 document.getElementById('edit-meal-modal').addEventListener('click', e => {
@@ -900,6 +910,14 @@ document.getElementById('goal-modal').addEventListener('click', e => {
 /* ─────────────────────────────────────────────────────────
    CALORIE WARNING
 ───────────────────────────────────────────────────────── */
+function forceSaveMeal() {
+    if (state.editTarget) {
+        _internal_saveEditedMeal();
+    } else {
+        _internal_saveNewMeal();
+    }
+}
+
 function closeCalorieWarning() {
   document.getElementById('calorie-warning-modal').classList.remove('open');
 }
