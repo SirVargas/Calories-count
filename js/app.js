@@ -57,6 +57,10 @@ const TRANSLATIONS = {
     areYouSure: 'Are you sure?',
     highCalorieWarning: 'This meal has over 3500 calories. Please confirm this is correct.',
     saveAnyway: 'Save Anyway',
+    breakfast: 'Breakfast',
+    lunch: 'Lunch',
+    dinner: 'Dinner',
+    snack: 'Snack',
   },
   es: {
     appTitle: 'Caloriq',
@@ -113,6 +117,10 @@ const TRANSLATIONS = {
     areYouSure: '¿Estás seguro?',
     highCalorieWarning: 'Esta comida tiene más de 3500 calorías. Por favor, confirma que esto es correcto.',
     saveAnyway: 'Guardar de todos modos',
+    breakfast: 'Desayuno',
+    lunch: 'Almuerzo',
+    dinner: 'Cena',
+    snack: 'Snack',
   }
 };
 
@@ -197,7 +205,7 @@ function toggleLang() {
   state.lang = state.lang === 'en' ? 'es' : 'en';
   persistState();
   applyI18n();
-  if (state.screen === 'home') renderHome();
+  renderHome();
   if (state.screen === 'stats') renderStats();
 }
 
@@ -210,7 +218,7 @@ function showScreen(name) {
   state.screen = name;
 }
 
-function goHome() { renderHome(); showScreen('home'); }
+function goHome() { showScreen('home'); renderHome(); }
 function goCapture() {
   resetAnalyzingScreen();
   showScreen('capture');
@@ -250,68 +258,79 @@ function todayTotals() {
   }), { cal: 0, protein: 0, carbs: 0, fat: 0 });
 }
 
+function getMealTag(hour) {
+    if (hour >= 5 && hour < 11) return 'breakfast';
+    if (hour >= 11 && hour < 14) return 'lunch';
+    if (hour >= 17 && hour < 22) return 'dinner';
+    return 'snack';
+}
+
 /* ─────────────────────────────────────────────────────────
    RENDER HOME
 ───────────────────────────────────────────────────────── */
 function renderHome() {
-  const locale = state.lang === 'es' ? 'es-MX' : 'en-US';
-  document.getElementById('strip-date').textContent =
-    new Date().toLocaleDateString(locale, { weekday: 'long', month: 'long', day: 'numeric' });
+  // Use a timeout to ensure the DOM updates after state changes
+  setTimeout(() => {
+    const locale = state.lang === 'es' ? 'es-MX' : 'en-US';
+    document.getElementById('strip-date').textContent =
+      new Date().toLocaleDateString(locale, { weekday: 'long', month: 'long', day: 'numeric' });
 
-  const totals = todayTotals();
-  document.getElementById('strip-cal-num').textContent = Math.round(totals.cal);
-  document.getElementById('strip-goal-num').textContent = state.dailyGoal;
-  document.getElementById('h-protein').textContent = Math.round(totals.protein) + 'g';
-  document.getElementById('h-carbs').textContent = Math.round(totals.carbs) + 'g';
-  document.getElementById('h-fat').textContent = Math.round(totals.fat) + 'g';
+    const totals = todayTotals();
+    document.getElementById('strip-cal-num').textContent = Math.round(totals.cal);
+    document.getElementById('strip-goal-num').textContent = state.dailyGoal;
+    document.getElementById('h-protein').textContent = Math.round(totals.protein) + 'g';
+    document.getElementById('h-carbs').textContent = Math.round(totals.carbs) + 'g';
+    document.getElementById('h-fat').textContent = Math.round(totals.fat) + 'g';
 
-  let pct = 0;
-  if (state.dailyGoal > 0) {
-      pct = (totals.cal / state.dailyGoal) * 100;
-  }
-  const fill = document.getElementById('progress-fill');
-  fill.style.width = Math.min(100, pct) + '%';
-  fill.classList.toggle('over', pct > 100);
+    let pct = 0;
+    if (state.dailyGoal > 0) {
+        pct = (totals.cal / state.dailyGoal) * 100;
+    }
+    const fill = document.getElementById('progress-fill');
+    fill.style.width = Math.min(100, pct) + '%';
+    fill.classList.toggle('over', pct >= 100);
 
-  const list = document.getElementById('meal-list');
-  const meals = todayMeals().slice().reverse();
-  if (!meals.length) {
-    list.innerHTML = `<div class="empty-state">
-      <div class="empty-icon">🍽️</div>
-      <p class="empty-text">${t('noMealsToday')}<br/>${t('tapToStart')}</p>
-    </div>`;
-    return;
-  }
+    const list = document.getElementById('meal-list');
+    const meals = todayMeals().slice().reverse();
+    if (!meals.length) {
+      list.innerHTML = `<div class="empty-state">
+        <div class="empty-icon">🍽️</div>
+        <p class="empty-text">${t('noMealsToday')}<br/>${t('tapToStart')}</p>
+      </div>`;
+      return;
+    }
 
-  list.innerHTML = meals.map(m => {
-    const mealName = (typeof m.name === 'object' && m.name) ? (m.name[state.lang] || m.name.en) : m.name;
-    return `
-    <div class="meal-card">
-      <div class="meal-card-inner">
-        ${m.photo
-          ? `<img class="meal-thumb" src="${m.photo}" alt="${escHtml(mealName)}"/>`
-          : `<div class="meal-thumb" style="background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:28px">🍽️</div>`}
-        <div class="meal-info">
-          <div>
-            <div class="meal-name">${escHtml(mealName)}</div>
-            <div class="meal-time">${m.time}</div>
+    list.innerHTML = meals.map(m => {
+      const mealName = (typeof m.name === 'object' && m.name) ? (m.name[state.lang] || m.name.en) : m.name;
+      const mealTag = m.tag ? t(m.tag) : '';
+      return `
+      <div class="meal-card">
+        <div class="meal-card-inner">
+          ${m.photo
+            ? `<img class="meal-thumb" src="${m.photo}" alt="${escHtml(mealName)}"/>`
+            : `<div class="meal-thumb" style="background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:28px">🍽️</div>`}
+          <div class="meal-info">
+            <div>
+              <div class="meal-name">${escHtml(mealName)}</div>
+              <div class="meal-time">${mealTag ? `<span class="meal-tag">${mealTag}</span>` : ''}${m.time}</div>
+            </div>
+            <div class="meal-cals-row">
+              <span><span class="meal-cals">${Math.round(m.cals)}</span><span class="meal-kcal-label"> kcal</span></span>
+              <span class="meal-macros">P ${Math.round(m.protein)}g · C ${Math.round(m.carbs)}g · F ${Math.round(m.fat)}g</span>
+            </div>
           </div>
-          <div class="meal-cals-row">
-            <span><span class="meal-cals">${Math.round(m.cals)}</span><span class="meal-kcal-label"> kcal</span></span>
-            <span class="meal-macros">P ${Math.round(m.protein)}g · C ${Math.round(m.carbs)}g · F ${Math.round(m.fat)}g</span>
+          <div class="meal-actions">
+            <button class="meal-action-btn" title="${t('editMeal')}" onclick="openEditMeal('${m.id}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="meal-action-btn" title="${t('delete')}" onclick="askDelete('${m.id}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+            </button>
           </div>
-        </div>
-        <div class="meal-actions">
-          <button class="meal-action-btn" title="${t('editMeal')}" onclick="openEditMeal('${m.id}')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          </button>
-          <button class="meal-action-btn" title="${t('delete')}" onclick="askDelete('${m.id}')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-          </button>
         </div>
       </div>
-    </div>
-  `}).join('');
+    `}).join('');
+  }, 0);
 }
 
 /* ─────────────────────────────────────────────────────────
@@ -779,7 +798,8 @@ function _internal_saveNewMeal() {
   const meal = {
     id: 'meal_' + Date.now(),
     date: getLocalDateKey(now),
-    time: now.toLocaleTimeString(state.lang === 'es' ? 'es-MX' : 'en-US', { hour: '2-digit', minute: '2-digit' }),
+    time: now.toLocaleTimeString(state.lang === 'es' ? 'es-MX' : 'en-US', { hour: 'numeric', minute: '2-digit' }),
+    tag: getMealTag(now.getHours()),
     name: nameObject,
     cals, protein, carbs, fat,
     photo: state.currentPhoto,
@@ -876,8 +896,8 @@ function closeDeleteModal() {
 function confirmDelete() {
   state.meals = state.meals.filter(m => m.id !== state.deleteTarget);
   persistState();
-  closeDeleteModal();
   renderHome();
+  closeDeleteModal();
 }
 
 /* ─────────────────────────────────────────────────────────
@@ -983,7 +1003,7 @@ function toggleTheme() {
 ───────────────────────────────────────────────────────── */
 loadState();
 applyI18n();
-if (state.screen === 'home') { renderHome(); }
+renderHome();
 showScreen(state.screen);
 
 
