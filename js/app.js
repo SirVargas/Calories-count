@@ -55,7 +55,7 @@ const TRANSLATIONS = {
     macroDistribution: 'Macro Distribution',
     calorieTrend: 'Calorie Trend',
     areYouSure: 'Are you sure?',
-    highCalorieWarning: 'This meal has over 4000 calories. Please confirm this is correct.',
+    highCalorieWarning: 'This meal has over 3500 calories. Please confirm this is correct.',
     saveAnyway: 'Save Anyway',
   },
   es: {
@@ -111,7 +111,7 @@ const TRANSLATIONS = {
     macroDistribution: 'Distribución de Macros',
     calorieTrend: 'Tendencia de Calorías',
     areYouSure: '¿Estás seguro?',
-    highCalorieWarning: 'Esta comida tiene más de 4000 calorías. Por favor, confirma que esto es correcto.',
+    highCalorieWarning: 'Esta comida tiene más de 3500 calorías. Por favor, confirma que esto es correcto.',
     saveAnyway: 'Guardar de todos modos',
   }
 };
@@ -752,7 +752,7 @@ function showResult(r) {
 ───────────────────────────────────────────────────────── */
 function saveMeal() {
   const cals = parseFloat(document.getElementById('edit-cals').value) || 0;
-  if (cals > 4000) {
+  if (cals > 3500) {
     document.getElementById('calorie-warning-modal').classList.add('open');
     return;
   }
@@ -826,7 +826,7 @@ function closeEditMeal() {
 
 function saveEditMeal() {
   const cals = parseFloat(document.getElementById('edit-meal-cals').value) || 0;
-  if (cals > 4000) {
+  if (cals > 3500) {
       document.getElementById('calorie-warning-modal').classList.add('open');
       return;
   }
