@@ -54,6 +54,9 @@ const TRANSLATIONS = {
     dailyCalories: 'Daily Calories',
     macroDistribution: 'Macro Distribution',
     calorieTrend: 'Calorie Trend',
+    areYouSure: 'Are you sure?',
+    highCalorieWarning: 'This meal has over 4000 calories. Please confirm this is correct.',
+    saveAnyway: 'Save Anyway',
   },
   es: {
     appTitle: 'Caloriq',
@@ -107,6 +110,9 @@ const TRANSLATIONS = {
     dailyCalories: 'Calorías Diarias',
     macroDistribution: 'Distribución de Macros',
     calorieTrend: 'Tendencia de Calorías',
+    areYouSure: '¿Estás seguro?',
+    highCalorieWarning: 'Esta comida tiene más de 4000 calorías. Por favor, confirma que esto es correcto.',
+    saveAnyway: 'Guardar de todos modos',
   }
 };
 
@@ -746,6 +752,15 @@ function showResult(r) {
 ───────────────────────────────────────────────────────── */
 function saveMeal() {
   const cals = parseFloat(document.getElementById('edit-cals').value) || 0;
+  if (cals > 4000) {
+    document.getElementById('calorie-warning-modal').classList.add('open');
+    return;
+  }
+  forceSaveMeal();
+}
+
+function forceSaveMeal() {
+  const cals = parseFloat(document.getElementById('edit-cals').value) || 0;
   const protein = parseFloat(document.getElementById('edit-protein').value) || 0;
   const carbs = parseFloat(document.getElementById('edit-carbs').value) || 0;
   const fat = parseFloat(document.getElementById('edit-fat').value) || 0;
@@ -783,6 +798,7 @@ function saveMeal() {
   renderHome();
   showScreen('home');
   showToast(t('mealSaved'), true);
+  closeCalorieWarning();
 }
 
 /* ─────────────────────────────────────────────────────────
@@ -882,6 +898,13 @@ document.getElementById('goal-modal').addEventListener('click', e => {
 });
 
 /* ─────────────────────────────────────────────────────────
+   CALORIE WARNING
+───────────────────────────────────────────────────────── */
+function closeCalorieWarning() {
+  document.getElementById('calorie-warning-modal').classList.remove('open');
+}
+
+/* ─────────────────────────────────────────────────────────
    TOAST
 ───────────────────────────────────────────────────────── */
 let toastTimer;
@@ -972,3 +995,5 @@ window.closeDeleteModal = closeDeleteModal;
 window.confirmDelete = confirmDelete;
 window.openEditMeal = openEditMeal;
 window.askDelete = askDelete;
+window.closeCalorieWarning = closeCalorieWarning;
+window.forceSaveMeal = forceSaveMeal;

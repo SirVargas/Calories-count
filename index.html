@@ -285,7 +285,21 @@
       </div>
     </div>
 
-    <div id="toast"></div>
+    <!-- ─────────────────────────────────────────────────────────
+         CALORIE WARNING MODAL
+    ───────────────────────────────────────────────────────── -->
+    <div id="calorie-warning-modal" onclick="closeCalorieWarning()">
+      <div class="delete-card" onclick="event.stopPropagation()">
+        <h3 class="delete-title" data-i18n="areYouSure">Are you sure?</h3>
+        <p class="delete-sub" id="calorie-warning-text" data-i18n="highCalorieWarning">This meal has over 4000 calories. Please confirm this is correct.</p>
+        <div class="delete-btns">
+          <button class="delete-cancel" onclick="closeCalorieWarning()" data-i18n="cancel">Cancel</button>
+          <button class="delete-confirm" onclick="forceSaveMeal()" data-i18n="saveAnyway">Save Anyway</button>
+        </div>
+      </div>
+    </div>
+
+⁰q    <div id="toast"></div>
   </div>
 
   <script src="js/config.js"></script>
