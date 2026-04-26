@@ -953,3 +953,22 @@ showScreen(state.screen);
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
+
+/* ─────────────────────────────────────────────────────────
+   EXPOSE FUNCTIONS
+───────────────────────────────────────────────────────── */
+window.toggleLang = toggleLang;
+window.toggleTheme = toggleTheme;
+window.goStats = goStats;
+window.openGoalModal = openGoalModal;
+window.goCapture = goCapture;
+window.goHome = goHome;
+window.analyzePhoto = analyzePhoto;
+window.saveMeal = saveMeal;
+window.setStatsView = setStatsView;
+window.saveGoal = saveGoal;
+window.saveEditMeal = saveEditMeal;
+window.closeDeleteModal = closeDeleteModal;
+window.confirmDelete = confirmDelete;
+window.openEditMeal = openEditMeal;
+window.askDelete = askDelete;
