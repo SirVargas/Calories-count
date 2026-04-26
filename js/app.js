@@ -33,7 +33,7 @@ const TRANSLATIONS = {
     setTarget: 'Set your target for the day.',
     saveGoal: 'Save goal',
     goalUpdated: '✓ Daily goal updated to',
-    goalError: 'Please enter a goal between 500 and 9999 kcal',
+    goalError: 'Please enter a goal between 10 and 9999 kcal',
     mealSaved: '✓ Meal saved to today\'s log',
     removeThisMeal: 'Remove this meal?',
     deleteEntry: 'This entry will be deleted from your log.',
@@ -89,7 +89,7 @@ const TRANSLATIONS = {
     setTarget: 'Establece tu objetivo del día.',
     saveGoal: 'Guardar meta',
     goalUpdated: '✓ Meta diaria actualizada a',
-    goalError: 'Ingresa una meta entre 500 y 9999 kcal',
+    goalError: 'Ingresa una meta entre 10 y 9999 kcal',
     mealSaved: '✓ Comida guardada en el registro de hoy',
     removeThisMeal: '¿Eliminar esta comida?',
     deleteEntry: 'Esta entrada se eliminará de tu registro.',
@@ -795,8 +795,7 @@ function _internal_saveNewMeal() {
   document.getElementById('file-input').value = '';
 
   persistState();
-  renderHome();
-  showScreen('home');
+  goHome();
   showToast(t('mealSaved'), true);
   closeCalorieWarning();
 }
@@ -891,7 +890,7 @@ function openGoalModal() {
 
 function saveGoal() {
   const g = parseInt(document.getElementById('goal-input').value);
-  if (g >= 500 && g <= 9999) {
+  if (g >= 10 && g <= 9999) {
     state.dailyGoal = g;
     persistState();
     renderHome();
